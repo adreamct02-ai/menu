@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>아르쥬 청담 메뉴</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a paper menu on a phone. Sticky tab strip, one panel at a time, name left and price right on every row. */
+:root {
+  --paper: #ecebe7;
+  --card: #f6f5f2;
+  --ink: #17120f;
+  --muted: #6b645d;
+  --line: #cfcbc4;
+  --accent: #7a1016;
+  --font-display: "Bodoni Moda", "Noto Serif KR", Georgia, serif;
+  --font-body: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.45;
+}
+header { padding: 28px 16px 16px; max-width: 640px; margin: 0 auto; }
+.brand { font-family: var(--font-display); font-weight: 700; font-size: 34px; letter-spacing: .12em; line-height: 1; margin: 0; }
+.sub { margin: 8px 0 0; font-size: 12px; letter-spacing: .22em; color: var(--muted); text-transform: uppercase; }
+.ask { margin: 14px 0 0; font-size: 14px; font-weight: 500; color: var(--accent); }
+.tabs-wrap { position: sticky; top: 0; z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line); }
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; max-width: 640px; margin: 0 auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  flex: none; border: 1px solid var(--line); background: transparent; color: var(--ink);
+  font: 500 14px var(--font-body); padding: 8px 14px; border-radius: 999px; cursor: pointer;
+}
+.tab[aria-selected="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { max-width: 640px; margin: 0 auto; padding: 8px 16px 40px; }
+.sec { margin-top: 28px; }
+.sec h2 { font-family: var(--font-display); font-weight: 700; font-size: 24px; letter-spacing: .02em; margin: 0; text-wrap: balance; }
+.sec .note { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); }
+.list { margin: 10px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--ink); }
+.item { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.item .l { min-width: 0; }
+.tag { display: block; font-size: 10.5px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.ko { font-weight: 700; font-size: 15.5px; }
+.en { display: block; font-size: 12.5px; color: var(--muted); }
+.desc { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.price { flex: none; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dmq { flex: none; align-self: center; font-size: 12px; font-weight: 500; color: var(--accent); white-space: nowrap; }
+.price small { display: inline-block; font-weight: 500; font-size: 11px; color: var(--muted); margin-right: 4px; }
+.price .row { display: block; }
+.price s { font-weight: 400; color: var(--muted); margin-right: 6px; }
+.grid { margin: 10px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; border-top: 1px solid var(--ink); }
+.grid li { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.flat { display: inline-block; margin-top: 8px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); }
+.hh { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--accent); padding: 14px 14px 4px; margin-top: 24px; }
+.hh h2 { color: var(--accent); }
+.hh .list { border-top-color: var(--line); }
+.hh .item:last-child { border-bottom: 0; }
+footer { max-width: 640px; margin: 0 auto; padding: 0 16px 48px; font-size: 12px; color: var(--muted); }
+footer p { margin: 0 0 8px; }
+footer .dm { color: var(--ink); font-weight: 500; }
+@media (prefers-reduced-motion: no-preference) { .tab { transition: background .15s, color .15s; } }
+</style>
+</head>
+<body>
+<header>
+  <h1 class="brand">ARZU</h1>
+  <p class="sub">Cheongdam · Menu</p>
+  <p class="ask">DM 문의로 표시된 메뉴의 가격은 인스타그램 DM으로 문의해 주세요.</p>
+</header>
+<div class="tabs-wrap"><div class="tabs" role="tablist" id="tabs"></div></div>
+<main id="panels"></main>
+<footer>
+  <p class="dm">가격·예약·단체·제휴 문의는 인스타그램 DM으로 보내주세요.</p>
+  <p>쾌적한 서비스 제공을 위해, 모든 고객님께 사전 결제를 요청드리고 있습니다. 깊은 양해 부탁드립니다.</p>
+  <p>We kindly ask for prepayment as part of our standard policy. Thank you for your understanding.</p>
+  <p>[원산지 표기] 소고기(국내산, 호주산) 돼지고기(국내산, 미국산) 오리(국내산) 쌀(국내산) 문어(필리핀) 굴(국내산)</p>
+</footer>
+<script>
+/* n: 한글, e: 영문, d: 설명, p: 가격(원), g: 잔 가격, o: 이전 가격, c: 원산지 */
+var DATA = [
+{ id: "food", label: "푸드", secs: [
+  { cls: "hh", t: "HAPPY HOUR", note: "18:00 ~ 20:00 · 메인 요리 주문 시 위스퍼링 엔젤 2잔 무료", items: [
+    { n: "살시차 크림 파케리 + 위스퍼링 엔젤" },
+    { n: "카르파치오 + 위스퍼링 엔젤" },
+    { n: "라자냐 + 위스퍼링 엔젤" },
+    { n: "오리다리 콩피 + 위스퍼링 엔젤" }
+  ]},
+  { t: "MAIN DISH", items: [
+    { n: "오리다리 콩피", e: "Confit de Canard", d: "수비드로 이븐하게 익힌 다릿살, 진심이 담긴 소스. 프렌치 퀴진의 정수" },
+    { n: "오리가슴 스테이크", e: "Magret de Canard", d: "지방을 뺀 훈연 가슴살 베이스팅 겉바속촉. 정밀한 식감만족" },
+    { n: "마라 양갈비", e: "Spicy Rack of Lamb", d: "마라오일과 스모크 타히니로 맛과 향, 보는 즐거움까지" },
+    { n: "한우등심 스테이크", e: "Strip Loin Steak", d: "비범한 가니쉬와 와인소스, 믿고 즐기는 한우 채끝살" }
+  ]},
+  { t: "APPETIZER", items: [
+    { n: "시저샐러드", e: "Grilled Caesar Salad", d: "토마토살사의 상큼한 킥과 불향의 조화" },
+    { n: "뽈뽀", e: "Pulpo a Feira", d: "지중해의 풍미. 스페인식 문어요리" },
+    { n: "스모크 비프 타르타르", e: "Smoke Beef Tartare", d: "훈연향을 입힌 고급 육회 전채요리" },
+    { n: "카르파치오", e: "Beef Carpaccio", d: "신선한 쇠고기와 샐러드, 입맛을 당기는 이탈리아식 차가운 전채요리" }
+  ]},
+  { t: "PASTA & K-FOOD", items: [
+    { n: "살시차 크림 파케리", e: "Salsiccia Cream Pacchieri", d: "파케리면의 씹는 즐거움과 깊은 풍미의 크림소스" },
+    { n: "까르보나라", e: "Classic Jambon Carbonara", d: "고소하고 꾸덕한 클래식. 딸리아뗄레면" },
+    { n: "아마트리치아나", e: "Amatriciana", d: "토마토베이스 소스의 파스타" },
+    { n: "봉골레", e: "Vongole", d: "이탈리아의 가장 대중적인 조개 파스타" },
+    { n: "라자냐", e: "Lasagne with White Ragu", d: "페코리노치즈, 묵직한 라구소스와 부추그레몰라타의 산뜻한 킥" },
+    { n: "라구 파스타", e: "Ragu Pappardelle", d: "붉은양념과 다진고기를 장시간 달인 깊은 감칠맛. 파파델레면" },
+    { n: "홍새우 비스크 리조또", e: "Red Shrimp Risotto with Bisque Sauce", d: "호쾌한 사이즈의 홍새우를 통째로, 녹진한 비스크 소스와 감태, 세모가사리" },
+    { n: "감자 뇨끼", e: "Porcini Gnocchi", d: "최상급 포르치니버섯의 진한 맛과 향" },
+    { n: "김치볶음밥", e: "Kimchi + F.Rice + S.Eggs + Coke", d: "항정살과 깍두기. 기쁨의 텍스처, 아르쥬 특제 K소울푸드" }
+  ]},
+  { t: "DESSERT", items: [
+    { n: "말차티라미수", e: "Matcha Tiramisu", d: "이탈리아의 대표적인 낭만 디저트" },
+    { n: "클래식 바스크 치즈케이크", e: "Classic Basque Cheese Cake", d: "밀도 높은 부드러움. 수제 치즈케이크와 작은 한입들" }
+  ]},
+  { t: "SIDE DISH", items: [
+    { n: "햄&치즈 플래터", e: "Charcuterie & Cheese Platter", d: "초리조, 잠봉, 고다, 크림치즈와 견과류" },
+    { n: "과일 플래터", e: "Fruit Platter", d: "신선한 제철과일, 위스키 페어링" },
+    { n: "과일&치즈 플래터", e: "Fruit & Cheese Platter", d: "제철과일과 햄, 치즈, 올리브, 견과류" }
+  ]}
+]},
+{ id: "drinks", label: "커피·음료", secs: [
+  { t: "CAFE", items: [
+    { n: "아메리카노", e: "Americano" },
+    { n: "카페라떼", e: "Cafe Latte" },
+    { n: "바닐라 라떼", e: "Vanilla Latte" },
+    { n: "쥬스", e: "Juice", d: "자몽, 오렌지, 크렌베리, 파인애플" }
+  ]},
+  { t: "NON-ALCOHOLIC", note: "논알콜 칵테일", grid: [
+    ["논알콜 피나콜라다", "Pina Colada"], ["논알콜 모히또", "Mojito"], ["논알콜 베리 키스", "Berry Kiss"]
+  ]},
+  { t: "SODA CAN",  grid: [
+    ["코카 콜라", "Coke"], ["코카 콜라 제로", "Coke Zero"], ["스프라이트", "Sprite"], ["진저 에일", "Ginger Ale"],
+    ["클럽 소다", "Club Soda"], ["토닉워터", "Tonic Water"], ["에너지 드링크", "Energy Drink"]
+  ]}
+]},
+{ id: "cocktail", label: "칵테일·맥주", secs: [
+  { t: "COCKTAILS", flat: 20000, grid: [
+    ["플라워 하이볼", "Flower Highball"], ["에스프레소 마티니", "Espresso Martini"],
+    ["진토닉", "Gin & Tonic"], ["갓파더", "Godfather"],
+    ["위스키 하이볼", "Whiskey Highball"], ["올드패션드", "Old Fashioned"],
+    ["아르쥬 하이볼", "Arzu Highball"], ["블랙러시안", "Black Russian"],
+    ["롱아일랜드 아이스티", "Long Island Iced Tea"], ["네그로니", "Negroni"],
+    ["김렛", "Gimlet"], ["킹스턴클럽", "Kingston Club"],
+    ["맨하탄", "Manhattan"], ["모스코뮬", "Moscow Mule"],
+    ["코스모폴리탄", "Cosmopolitan"], ["위스키사워", "Whiskey Sour"],
+    ["마가리타", "Margarita"], ["애플마티니", "Apple Martini"],
+    ["마티니", "Martini"], ["피나콜라다 알콜", "Pina Colada"],
+    ["모히또 알콜", "Mojito"], ["피치블라썸", "Peach Blossom"],
+    ["멜론사워", "Melon Sour"], ["베리 키스 알콜", "Berry Kiss"],
+    ["준벅", "June Bug"], ["노블리스", "Nobless"],
+    ["섹스온더비치", "Sex on the Beach"], ["돈 쥬앙", "Don Juan"],
+    ["사디스트", "Sadist"], ["누보 리치", "Nuovo & Rich"]
+  ]},
+  { t: "BEER", items: [
+    { n: "버드와이저", e: "Budweiser", p: 15000 },
+    { n: "팹스트 블루 리본", e: "Pabst Blue Ribbon, PBR", p: 15000 },
+    { n: "기네스", e: "Guinness", p: 20000 },
+    { n: "호가든", e: "Hoegaarden", p: 15000 },
+    { n: "스텔라", e: "Stella", p: 15000 },
+    { n: "코로나", e: "Corona", p: 15000 },
+    { n: "버드와이저 1 + 데낄라샷 1", e: "Budweiser 1 + Tequila 1", p: 20000 },
+    { n: "버드와이저 3 + 데낄라샷 3", e: "Budweiser 3 + Tequila 3", p: 49000 }
+  ]}
+]},
+{ id: "champagne", label: "샴페인", secs: [
+  { t: "CHAMPAGNE", items: [
+    { n: "모엣 샹동 임페리얼", e: "Moët & Chandon" },
+    { n: "뵈브클리코", e: "Veuve Clicquot Brut" },
+    { n: "모엣 샹동 로제", e: "Moët & Chandon ROSE" },
+    { n: "모엣 샹동 NIRO", e: "Moët & Chandon NIRO" },
+    { n: "모엣 샹동 브뤼 임페리얼 골든 라이트업 매그넘 리미티드 1.5L", e: "Moët & Chandon Golden Light Up Magnum" },
+    { n: "크룩", e: "KRUG" },
+    { n: "돔페리뇽 루미너스", e: "Dom Pérignon Luminous" },
+    { n: "돔페리뇽 루미너스 로제", e: "Dom Pérignon Luminous ROSE" },
+    { n: "아르망드 브리냑 골드", e: "Armand de Brignac Brut Gold" },
+    { n: "아르망드 브리냑 로제", e: "Armand de Brignac Brut ROSE" },
+    { n: "딥 아이스", e: "Deep Ice" },
+    { n: "골든블랑 스타즈", e: "Golden Blanc Stars" },
+    { n: "골든블랑 오로라 루미너스", e: "Golden Blanc Aurora Luminous" },
+    { n: "골든블랑 오로라 핑크 로제 루미너스", e: "Golden Blanc Aurora ROSE Luminous" },
+    { n: "골든블랑 블루 미드나잇 루미너스" },
+    { n: "몬텔비니 루미너스", e: "Montelvini Luminus" },
+    { n: "몬텔비니 로제 루미너스", e: "Montelvini Rose Luminus" },
+    { n: "두메닐 브뤼", e: "Dumenil Brut" },
+    { n: "두메닐 드미섹", e: "Dumenil Demi Sec" },
+    { n: "진콜 루비스", e: "Jean Call Rubis" },
+    { n: "루이 로드레 크리스탈 브뤼", e: "Louis Roederer Cristal Brut" }
+  ]}
+]},
+{ id: "wine", label: "와인", secs: [
+  { t: "HOUSE WINE", note: "잔 기준", items: [
+    { n: "테라자스 레제르바 말벡", e: "Terrazas Reserva Malbec (레드)" },
+    { n: "핀카 바카라 예야", e: "Finca Bacara YEYA (화이트)" }
+  ]},
+  { t: "WHITE WINE", note: "병 기준", items: [
+    { c: "France", n: "더 오프닝 보르도 블랑", e: "The Opening Bordeaux Blanc (White Bordeaux Blend)" },
+    { c: "Spain", n: "핀카 바카라 예야", e: "Finca Bacara Yeya (Chardonnay & Moscate)" },
+    { c: "New Zealand", n: "클라우디 베이", e: "Cloudy Bay, Sauvignon Blanc" },
+    { c: "USA", n: "키슬러 쓰리 스틱스 듀렐 샤도네이", e: "Three Sticks Durell Chardonnay" }
+  ]},
+  { t: "RED WINE", note: "병 기준", items: [
+    { c: "France", n: "더 오프닝 보르도 루즈", e: "The Opening, Bordeaux Rouge (Bordeaux Blend)" },
+    { c: "Argentina", n: "테라자스 레제르바 말벡", e: "Terrazas Reserva Malbec" },
+    { c: "USA", n: "텍스트북 나파밸리", e: "Textbook, Napa Cabernet Sauvignon" },
+    { c: "Spain", n: "도미니오 드 핑구스 피에스아이", e: "Dominio de Pingus, PSI (Tempranillo Blend)" },
+    { c: "USA", n: "조셉 펠프스 까르베네 쇼비뇽", e: "Joseph Phelps Cabernet Sauvignon" }
+  ]},
+  { t: "ROSE WINE", note: "병 기준", items: [
+    { c: "France", n: "위스퍼링 엔젤", e: "Whispering Angel (Rosé Blend)" }
+  ]}
+]},
+{ id: "spirits", label: "위스키·기타", secs: [
+  { t: "SINGLE MALT WHISKY", items: [
+    { n: "맥캘란 12년", e: "The Macallan 12 (Speyside)" },
+    { n: "맥캘란 15년", e: "The Macallan 15 (Speyside)" },
+    { n: "맥캘란 18년", e: "The Macallan 18 (Speyside)" },
+    { n: "글렌그란트 아보랄리스", e: "The Glen Grant Arboralis (Speyside)" },
+    { n: "글렌그란트 12년", e: "The Glen Grant 12 (Speyside)" },
+    { n: "글렌그란트 15년", e: "The Glen Grant 15 (Speyside)" },
+    { n: "글렌그란트 18년", e: "The Glen Grant 18 (Speyside)" },
+    { n: "글렌그란트 21년", e: "The Glen Grant 21 (Speyside)" },
+    { n: "글렌그란트 25년", e: "The Glen Grant 25 (Speyside)" },
+    { n: "글렌그란트 60년", e: "The Glen Grant 60 (Speyside)" },
+    { n: "발베니 12년", e: "Balvenie 12 (Speyside)" },
+    { n: "글렌모렌지 시그넷", e: "Glenmorangie Signet (Highland)" },
+    { n: "탈리스커 10년", e: "Talisker 10 (Skye)" },
+    { n: "라프로익 10년", e: "Laphroaig 10 (Islay)" },
+    { n: "아드벡 10년", e: "Ardbeg 10 (Islay)" }
+  ]},
+  { t: "SCOTCH WHISKY", items: [
+    { n: "블랙 바틀 앤디안 오크", e: "Black Bottle Andean Oak" },
+    { n: "조니워커 골드", e: "Johnnie Walker Gold" },
+    { n: "로얄 살루트 21년", e: "Royal Salute 21" },
+    { n: "조니워커 블루", e: "Johnnie Walker Blue" },
+    { n: "발렌타인 30년", e: "Ballantine's 30" }
+  ]},
+  { t: "BOURBON WHISKY", items: [
+    { n: "와일드 터키 레어 브리드", e: "Wild Turkey Rare Breed" },
+    { n: "와일드 터키 마스터스 킵 코너스톤 라이", e: "Wild Turkey Master's Keep Cornerstone Rye" },
+    { n: "와일드 터키 마스터스 킵 언포가튼", e: "Wild Turkey Master's Keep Unforgotten" },
+    { n: "와일드 터키 마스터스 킵 보이지", e: "Wild Turkey Master's Keep Voyage" }
+  ]},
+  { t: "COGNAC", items: [
+    { n: "헤네시 VSOP", e: "Hennessy VSOP" },
+    { n: "헤네시 XO", e: "Hennessy XO" },
+    { n: "레미마틴 VSOP", e: "Remy Martin VSOP" },
+    { n: "레미마틴 XO", e: "Remy Martin XO" },
+    { n: "루이 13세", e: "Louis XIII" }
+  ]},
+  { t: "TEQUILA", items: [
+    { n: "에스폴론 블랑코", e: "Espolon Blanco" },
+    { n: "에스폴론 레포사도", e: "Espolon Reposado" },
+    { n: "에스폴론 아네호", e: "Espolon Anejo" },
+    { n: "씨에라 데낄라", e: "Sierra Tequila" },
+    { n: "씨에라 데낄라 카페", e: "Sierra Tequila Cafe" },
+    { n: "돈 훌리오 블랑코", e: "Don Julio Blanco" },
+    { n: "페트론 실버", e: "Petron Silver" },
+    { n: "돈 훌리오 1942", e: "Don Julio 1942" },
+    { n: "클라세 아줄 레포사도", e: "Clase Azul Reposado" }
+  ]},
+  { t: "VODKA", items: [
+    { n: "벨베디어", e: "Belvedere" },
+    { n: "그레이구스", e: "Grey Goose" }
+  ]},
+  { t: "GIN", items: [
+    { n: "크래프터스", e: "Crafter's" },
+    { n: "헨드릭스 진", e: "Hendrick's Gin" }
+  ]},
+  { t: "LIQUEUR", items: [
+    { n: "로엘 제로 슈거 프리미엄 리큐어", e: "ROEL Finest Premium Liqueur ZERO SUGAR" },
+    { n: "아페롤", e: "Aperol" }
+  ]}
+]},
+{ id: "set", label: "세트", secs: [
+  { t: "SET MENU", note: "구성 선택형", items: [
+    { n: "딥 아이스 1", d: "+ 크래프터스 진 또는 시에라 또는 시에라 카페 또는 벨베디어 또는 로엘 제로 슈거 프리미엄 리큐어 중 택 1" },
+    { n: "모엣 샹동 임페리얼 1", d: "+ 크래프터스 진 또는 시에라 또는 시에라 카페 또는 벨베디어 또는 로엘 제로 슈거 프리미엄 리큐어 중 택 1" },
+    { n: "조니워커 블루 + 모엣 샹동 임페리얼 2병", d: "풍성한 과일&치즈 플래터 포함" },
+    { n: "돈훌리오 1942 + 모엣 샹동 임페리얼 2병", d: "풍성한 과일&치즈 플래터 포함" }
+  ]},
+  { t: "BOTTLE SET", note: "병 수 기준", items: [
+    { n: "딥 아이스", e: "3 BOTTLES" },
+    { n: "딥 아이스", e: "5 BOTTLES" },
+    { n: "모엣 샹동 임페리얼", e: "3 BOTTLES" },
+    { n: "모엣 샹동 임페리얼", e: "5 BOTTLES" },
+    { n: "모엣 샹동 로제", e: "3 BOTTLES" },
+    { n: "모엣 샹동 로제", e: "5 BOTTLES" },
+    { n: "모엣 샹동 NIRO", e: "3 BOTTLES" },
+    { n: "모엣 샹동 NIRO", e: "5 BOTTLES" },
+    { n: "돔페리뇽 루미너스", e: "3 BOTTLES" },
+    { n: "아르망드 브리냑 골드", e: "3 BOTTLES" }
+  ]},
+  { t: "MH EVENT", note: "샴페인 단품 이벤트 가격", items: [
+    { n: "모엣 샹동 임페리얼", e: "Moët & Chandon" },
+    { n: "모엣 샹동 로제", e: "Moët & Chandon ROSE" },
+    { n: "모엣 샹동 NIRO", e: "Moët & Chandon NIRO" },
+    { n: "모엣 샹동 브뤼 임페리얼 골든 라이트업 매그넘 리미티드 1.5L", e: "Moët & Chandon Golden Light Up Magnum" },
+    { n: "돔페리뇽 루미너스", e: "Dom Pérignon Luminous" },
+    { n: "아르망드 브리냑 골드", e: "Armand de Brignac Brut Gold" }
+  ]}
+]}
+];
+
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function won(n) { return Number(n).toLocaleString("ko-KR"); }
+
+var SHOW_PRICES = false; /* 가격은 DM 문의: true로 바꾸면 가격이 다시 표시됩니다 */
+function priceHtml(it) {
+  if (it.p != null && it.g != null) {
+    return '<span class="row"><small>병</small>' + won(it.p) + '</span><span class="row"><small>잔</small>' + won(it.g) + '</span>';
+  }
+  if (it.g != null) return '<span class="row"><small>잔</small>' + won(it.g) + '</span>';
+  if (it.o != null) return '<s>' + won(it.o) + '</s>' + won(it.p);
+  return won(it.p);
+}
+
+function itemHtml(it, ask, priced) {
+  var h = '<li class="item"><div class="l">';
+  if (it.c) h += '<span class="tag">' + esc(it.c) + '</span>';
+  h += '<span class="ko">' + esc(it.n) + '</span>';
+  if (it.e) h += '<span class="en">' + esc(it.e) + '</span>';
+  if (it.d) h += '<span class="desc">' + esc(it.d) + '</span>';
+  h += '</div>' + ((SHOW_PRICES || priced) ? '<div class="price">' + priceHtml(it) + '</div>' : (ask ? '<div class="dmq">DM 문의</div>' : '')) + '</li>';
+  return h;
+}
+
+function secHtml(s, ask, priced) {
+  var h = '<section class="sec ' + (s.cls || "") + '"><h2>' + esc(s.t) + '</h2>';
+  if (s.note) h += '<p class="note">' + esc(s.note) + '</p>';
+  if (s.grid && ask) {
+    h += '<ul class="list">' + s.grid.map(function (g) { return itemHtml({ n: g[0], e: g[1], p: s.flat }, true, priced); }).join("") + '</ul>';
+  } else if (s.grid) {
+    h += '<ul class="grid">' + s.grid.map(function (g) {
+      return '<li><span class="ko">' + esc(g[0]) + '</span><span class="en">' + esc(g[1]) + '</span></li>';
+    }).join("") + '</ul>';
+  } else {
+    h += '<ul class="list">' + s.items.map(function (it) { return itemHtml(it, ask, priced); }).join("") + '</ul>';
+  }
+  return h + '</section>';
+}
+
+var ASK_TABS = ["cocktail", "champagne", "wine", "spirits", "set"]; /* 술 탭: 각 줄 옆에 DM 문의 표시 */
+var PRICE_TABS = ["cocktail"]; /* 가격을 보여주는 탭: 칵테일·맥주 */
+var tabsEl = document.getElementById("tabs");
+var panelsEl = document.getElementById("panels");
+DATA.forEach(function (d) {
+  var b = document.createElement("button");
+  b.className = "tab"; b.type = "button"; b.id = "tab-" + d.id;
+  b.setAttribute("role", "tab"); b.setAttribute("aria-controls", "panel-" + d.id);
+  b.textContent = d.label;
+  b.addEventListener("click", function () { show(d.id, true); });
+  tabsEl.appendChild(b);
+  var p = document.createElement("div");
+  p.id = "panel-" + d.id; p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", "tab-" + d.id);
+  p.innerHTML = d.secs.map(function (s) { return secHtml(s, ASK_TABS.indexOf(d.id) >= 0, PRICE_TABS.indexOf(d.id) >= 0); }).join("");
+  panelsEl.appendChild(p);
+});
+
+function show(id, push) {
+  if (!DATA.some(function (d) { return d.id === id; })) id = DATA[0].id;
+  DATA.forEach(function (d) {
+    var on = d.id === id;
+    document.getElementById("panel-" + d.id).hidden = !on;
+    var t = document.getElementById("tab-" + d.id);
+    t.setAttribute("aria-selected", on ? "true" : "false");
+    if (on && push) { try { t.scrollIntoView({ inline: "center", block: "nearest" }); } catch (e) {} }
+  });
+  if (push) { try { history.replaceState(null, "", "#" + id); } catch (e) { location.hash = id; } window.scrollTo(0, 0); }
+}
+window.addEventListener("hashchange", function () { show(location.hash.slice(1), false); });
+show(location.hash.slice(1), false);
+</script>
+</body>
+</html>
