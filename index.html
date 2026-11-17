@@ -76,7 +76,7 @@ footer .dm { color: var(--ink); font-weight: 500; }
 <header>
   <h1 class="brand">ARZU</h1>
   <p class="sub">Cheongdam · Menu</p>
-  <p class="ask">DM 문의로 표시된 메뉴의 가격은 인스타그램 DM으로 문의해 주세요.</p>
+  <p class="ask">샴페인·와인·위스키 등 술 가격은 인스타그램 DM으로 문의해 주세요.</p>
 </header>
 <div class="tabs-wrap"><div class="tabs" role="tablist" id="tabs"></div></div>
 <main id="panels"></main>
@@ -91,55 +91,55 @@ footer .dm { color: var(--ink); font-weight: 500; }
 var DATA = [
 { id: "food", label: "푸드", secs: [
   { cls: "hh", t: "HAPPY HOUR", note: "18:00 ~ 20:00 · 메인 요리 주문 시 위스퍼링 엔젤 2잔 무료", items: [
-    { n: "살시차 크림 파케리 + 위스퍼링 엔젤" },
-    { n: "카르파치오 + 위스퍼링 엔젤" },
-    { n: "라자냐 + 위스퍼링 엔젤" },
-    { n: "오리다리 콩피 + 위스퍼링 엔젤" }
+    { n: "살시차 크림 파케리 + 위스퍼링 엔젤", p: 128000 },
+    { n: "카르파치오 + 위스퍼링 엔젤", p: 129000 },
+    { n: "라자냐 + 위스퍼링 엔젤", p: 129000 },
+    { n: "오리다리 콩피 + 위스퍼링 엔젤", p: 144000 }
   ]},
   { t: "MAIN DISH", items: [
-    { n: "오리다리 콩피", e: "Confit de Canard", d: "수비드로 이븐하게 익힌 다릿살, 진심이 담긴 소스. 프렌치 퀴진의 정수" },
-    { n: "오리가슴 스테이크", e: "Magret de Canard", d: "지방을 뺀 훈연 가슴살 베이스팅 겉바속촉. 정밀한 식감만족" },
-    { n: "마라 양갈비", e: "Spicy Rack of Lamb", d: "마라오일과 스모크 타히니로 맛과 향, 보는 즐거움까지" },
-    { n: "한우등심 스테이크", e: "Strip Loin Steak", d: "비범한 가니쉬와 와인소스, 믿고 즐기는 한우 채끝살" }
+    { n: "오리다리 콩피", e: "Confit de Canard", d: "수비드로 이븐하게 익힌 다릿살, 진심이 담긴 소스. 프렌치 퀴진의 정수", p: 45000 },
+    { n: "오리가슴 스테이크", e: "Magret de Canard", d: "지방을 뺀 훈연 가슴살 베이스팅 겉바속촉. 정밀한 식감만족", p: 45000 },
+    { n: "마라 양갈비", e: "Spicy Rack of Lamb", d: "마라오일과 스모크 타히니로 맛과 향, 보는 즐거움까지", p: 74000 },
+    { n: "한우등심 스테이크", e: "Strip Loin Steak", d: "비범한 가니쉬와 와인소스, 믿고 즐기는 한우 채끝살", p: 98000 }
   ]},
   { t: "APPETIZER", items: [
-    { n: "시저샐러드", e: "Grilled Caesar Salad", d: "토마토살사의 상큼한 킥과 불향의 조화" },
-    { n: "뽈뽀", e: "Pulpo a Feira", d: "지중해의 풍미. 스페인식 문어요리" },
-    { n: "스모크 비프 타르타르", e: "Smoke Beef Tartare", d: "훈연향을 입힌 고급 육회 전채요리" },
-    { n: "카르파치오", e: "Beef Carpaccio", d: "신선한 쇠고기와 샐러드, 입맛을 당기는 이탈리아식 차가운 전채요리" }
+    { n: "시저샐러드", e: "Grilled Caesar Salad", d: "토마토살사의 상큼한 킥과 불향의 조화", p: 21000 },
+    { n: "뽈뽀", e: "Pulpo a Feira", d: "지중해의 풍미. 스페인식 문어요리", p: 27000 },
+    { n: "스모크 비프 타르타르", e: "Smoke Beef Tartare", d: "훈연향을 입힌 고급 육회 전채요리", p: 28000 },
+    { n: "카르파치오", e: "Beef Carpaccio", d: "신선한 쇠고기와 샐러드, 입맛을 당기는 이탈리아식 차가운 전채요리", p: 30000 }
   ]},
   { t: "PASTA & K-FOOD", items: [
-    { n: "살시차 크림 파케리", e: "Salsiccia Cream Pacchieri", d: "파케리면의 씹는 즐거움과 깊은 풍미의 크림소스" },
-    { n: "까르보나라", e: "Classic Jambon Carbonara", d: "고소하고 꾸덕한 클래식. 딸리아뗄레면" },
-    { n: "아마트리치아나", e: "Amatriciana", d: "토마토베이스 소스의 파스타" },
-    { n: "봉골레", e: "Vongole", d: "이탈리아의 가장 대중적인 조개 파스타" },
-    { n: "라자냐", e: "Lasagne with White Ragu", d: "페코리노치즈, 묵직한 라구소스와 부추그레몰라타의 산뜻한 킥" },
-    { n: "라구 파스타", e: "Ragu Pappardelle", d: "붉은양념과 다진고기를 장시간 달인 깊은 감칠맛. 파파델레면" },
-    { n: "홍새우 비스크 리조또", e: "Red Shrimp Risotto with Bisque Sauce", d: "호쾌한 사이즈의 홍새우를 통째로, 녹진한 비스크 소스와 감태, 세모가사리" },
-    { n: "감자 뇨끼", e: "Porcini Gnocchi", d: "최상급 포르치니버섯의 진한 맛과 향" },
-    { n: "김치볶음밥", e: "Kimchi + F.Rice + S.Eggs + Coke", d: "항정살과 깍두기. 기쁨의 텍스처, 아르쥬 특제 K소울푸드" }
+    { n: "살시차 크림 파케리", e: "Salsiccia Cream Pacchieri", d: "파케리면의 씹는 즐거움과 깊은 풍미의 크림소스", p: 29000 },
+    { n: "까르보나라", e: "Classic Jambon Carbonara", d: "고소하고 꾸덕한 클래식. 딸리아뗄레면", p: 29000 },
+    { n: "아마트리치아나", e: "Amatriciana", d: "토마토베이스 소스의 파스타", p: 29000 },
+    { n: "봉골레", e: "Vongole", d: "이탈리아의 가장 대중적인 조개 파스타", p: 30000 },
+    { n: "라자냐", e: "Lasagne with White Ragu", d: "페코리노치즈, 묵직한 라구소스와 부추그레몰라타의 산뜻한 킥", p: 30000 },
+    { n: "라구 파스타", e: "Ragu Pappardelle", d: "붉은양념과 다진고기를 장시간 달인 깊은 감칠맛. 파파델레면", p: 30000 },
+    { n: "홍새우 비스크 리조또", e: "Red Shrimp Risotto with Bisque Sauce", d: "호쾌한 사이즈의 홍새우를 통째로, 녹진한 비스크 소스와 감태, 세모가사리", p: 37000 },
+    { n: "감자 뇨끼", e: "Porcini Gnocchi", d: "최상급 포르치니버섯의 진한 맛과 향", p: 31000 },
+    { n: "김치볶음밥", e: "Kimchi + F.Rice + S.Eggs + Coke", d: "항정살과 깍두기. 기쁨의 텍스처, 아르쥬 특제 K소울푸드", p: 24000 }
   ]},
   { t: "DESSERT", items: [
-    { n: "말차티라미수", e: "Matcha Tiramisu", d: "이탈리아의 대표적인 낭만 디저트" },
-    { n: "클래식 바스크 치즈케이크", e: "Classic Basque Cheese Cake", d: "밀도 높은 부드러움. 수제 치즈케이크와 작은 한입들" }
+    { n: "말차티라미수", e: "Matcha Tiramisu", d: "이탈리아의 대표적인 낭만 디저트", p: 15000 },
+    { n: "클래식 바스크 치즈케이크", e: "Classic Basque Cheese Cake", d: "밀도 높은 부드러움. 수제 치즈케이크와 작은 한입들", p: 15000 }
   ]},
   { t: "SIDE DISH", items: [
-    { n: "햄&치즈 플래터", e: "Charcuterie & Cheese Platter", d: "초리조, 잠봉, 고다, 크림치즈와 견과류" },
-    { n: "과일 플래터", e: "Fruit Platter", d: "신선한 제철과일, 위스키 페어링" },
-    { n: "과일&치즈 플래터", e: "Fruit & Cheese Platter", d: "제철과일과 햄, 치즈, 올리브, 견과류" }
+    { n: "햄&치즈 플래터", e: "Charcuterie & Cheese Platter", d: "초리조, 잠봉, 고다, 크림치즈와 견과류", p: 15000 },
+    { n: "과일 플래터", e: "Fruit Platter", d: "신선한 제철과일, 위스키 페어링", p: 45000 },
+    { n: "과일&치즈 플래터", e: "Fruit & Cheese Platter", d: "제철과일과 햄, 치즈, 올리브, 견과류", p: 98000 }
   ]}
 ]},
 { id: "drinks", label: "커피·음료", secs: [
   { t: "CAFE", items: [
-    { n: "아메리카노", e: "Americano" },
-    { n: "카페라떼", e: "Cafe Latte" },
-    { n: "바닐라 라떼", e: "Vanilla Latte" },
-    { n: "쥬스", e: "Juice", d: "자몽, 오렌지, 크렌베리, 파인애플" }
+    { n: "아메리카노", e: "Americano", p: 7000 },
+    { n: "카페라떼", e: "Cafe Latte", p: 9000 },
+    { n: "바닐라 라떼", e: "Vanilla Latte", p: 10000 },
+    { n: "쥬스", e: "Juice", d: "자몽, 오렌지, 크렌베리, 파인애플", p: 11000 }
   ]},
-  { t: "NON-ALCOHOLIC", note: "논알콜 칵테일", grid: [
+  { t: "NON-ALCOHOLIC", note: "논알콜 칵테일", flat: 20000, grid: [
     ["논알콜 피나콜라다", "Pina Colada"], ["논알콜 모히또", "Mojito"], ["논알콜 베리 키스", "Berry Kiss"]
   ]},
-  { t: "SODA CAN",  grid: [
+  { t: "SODA CAN", flat: 5000, grid: [
     ["코카 콜라", "Coke"], ["코카 콜라 제로", "Coke Zero"], ["스프라이트", "Sprite"], ["진저 에일", "Ginger Ale"],
     ["클럽 소다", "Club Soda"], ["토닉워터", "Tonic Water"], ["에너지 드링크", "Energy Drink"]
   ]}
@@ -338,8 +338,8 @@ function itemHtml(it, ask, priced) {
 function secHtml(s, ask, priced) {
   var h = '<section class="sec ' + (s.cls || "") + '"><h2>' + esc(s.t) + '</h2>';
   if (s.note) h += '<p class="note">' + esc(s.note) + '</p>';
-  if (s.grid && ask) {
-    h += '<ul class="list">' + s.grid.map(function (g) { return itemHtml({ n: g[0], e: g[1], p: s.flat }, true, priced); }).join("") + '</ul>';
+  if (s.grid && (ask || priced)) {
+    h += '<ul class="list">' + s.grid.map(function (g) { return itemHtml({ n: g[0], e: g[1], p: s.flat }, ask, priced); }).join("") + '</ul>';
   } else if (s.grid) {
     h += '<ul class="grid">' + s.grid.map(function (g) {
       return '<li><span class="ko">' + esc(g[0]) + '</span><span class="en">' + esc(g[1]) + '</span></li>';
@@ -351,7 +351,7 @@ function secHtml(s, ask, priced) {
 }
 
 var ASK_TABS = ["cocktail", "champagne", "wine", "spirits", "set"]; /* 술 탭: 각 줄 옆에 DM 문의 표시 */
-var PRICE_TABS = ["cocktail"]; /* 가격을 보여주는 탭: 칵테일·맥주 */
+var PRICE_TABS = ["food", "drinks", "cocktail"]; /* 가격을 보여주는 탭: 칵테일·맥주 */
 var tabsEl = document.getElementById("tabs");
 var panelsEl = document.getElementById("panels");
 DATA.forEach(function (d) {
