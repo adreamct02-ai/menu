@@ -6,7 +6,7 @@
 <title>아르쥬 청담 메뉴</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,700&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* Layout idea: a paper menu on a phone. Sticky tab strip, one panel at a time, name left and price right on every row. */
 :root {
@@ -70,24 +70,51 @@ footer { max-width: 640px; margin: 0 auto; padding: 0 16px 48px; font-size: 12px
 footer p { margin: 0 0 8px; }
 footer .dm { color: var(--ink); font-weight: 500; }
 @media (prefers-reduced-motion: no-preference) { .tab { transition: background .15s, color .15s; } }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.langs { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.lang-btn { border: 1px solid var(--line); background: transparent; color: var(--muted); font: 500 12px var(--font-body); padding: 5px 9px; border-radius: 999px; cursor: pointer; }
+.lang-btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.lang-btn:focus-visible, .gate-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cur { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+.gate { position: fixed; inset: 0; z-index: 50; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
+.gate[hidden] { display: none; }
+.gate-in { width: 100%; max-width: 420px; }
+.gate-brand { font-family: var(--font-display); font-weight: 700; font-size: 38px; letter-spacing: .14em; margin: 0 0 18px; }
+.gate-in h2 { font-size: 20px; margin: 0; font-weight: 700; }
+.gate-sub { margin: 8px 0 22px; font-size: 12.5px; line-height: 1.6; color: #b9b2aa; }
+.gate-list { display: grid; gap: 10px; }
+.gate-btn { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: 100%; text-align: left; border: 1px solid #5a514a; background: transparent; color: var(--paper); padding: 16px 18px; border-radius: 10px; cursor: pointer; font-family: var(--font-body); }
+.gate-btn:hover { border-color: var(--paper); }
+.gate-name { font-size: 20px; font-weight: 700; }
+.gate-sub-l { font-size: 12.5px; color: #b9b2aa; }
+html[lang="zh"] body, html[lang="zh"] button { font-family: "Noto Sans SC", "Noto Sans KR", system-ui, sans-serif; }
+html[lang="ja"] body, html[lang="ja"] button { font-family: "Noto Sans JP", "Noto Sans KR", system-ui, sans-serif; }
 </style>
 </head>
 <body>
 <header>
-  <h1 class="brand">ARZU</h1>
+  <div class="top">
+    <h1 class="brand">ARZU</h1>
+    <div class="langs" id="langs" role="group" aria-label="Language"></div>
+  </div>
   <p class="sub">Cheongdam · Menu</p>
-  <p class="ask">샴페인·와인·위스키 등 술 가격은 인스타그램 DM으로 문의해 주세요.</p>
+  <p class="ask" id="ask"></p>
+  <p class="cur" id="cur"></p>
 </header>
 <div class="tabs-wrap"><div class="tabs" role="tablist" id="tabs"></div></div>
 <main id="panels"></main>
-<footer>
-  <p class="dm">가격·예약·단체·제휴 문의는 인스타그램 DM으로 보내주세요.</p>
-  <p>쾌적한 서비스 제공을 위해, 모든 고객님께 사전 결제를 요청드리고 있습니다. 깊은 양해 부탁드립니다.</p>
-  <p>We kindly ask for prepayment as part of our standard policy. Thank you for your understanding.</p>
-  <p>[원산지 표기] 소고기(국내산, 호주산) 돼지고기(국내산, 미국산) 오리(국내산) 쌀(국내산) 문어(필리핀) 굴(국내산)</p>
-</footer>
+<footer id="foot"></footer>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" hidden>
+  <div class="gate-in">
+    <p class="gate-brand">ARZU</p>
+    <h2 id="gate-title">Select your country / language</h2>
+    <p class="gate-sub">국적 · 언어를 선택하세요<br>选择国家 / 语言 · 国・言語を選択してください</p>
+    <div class="gate-list" id="gatelist"></div>
+  </div>
+</div>
 <script>
-/* n: 한글, e: 영문, d: 설명, p: 가격(원), g: 잔 가격, o: 이전 가격, c: 원산지 */
+/* n: 한글, e: 영문, d: 설명, p: 가격(원), g: 잔 가격, k: 번역 키 */
 var DATA = [
 { id: "food", label: "푸드", secs: [
   { cls: "hh", t: "HAPPY HOUR", note: "18:00 ~ 20:00 · 메인 요리 주문 시 위스퍼링 엔젤 2잔 무료", items: [
@@ -117,7 +144,7 @@ var DATA = [
     { n: "라구 파스타", e: "Ragu Pappardelle", d: "붉은양념과 다진고기를 장시간 달인 깊은 감칠맛. 파파델레면", p: 30000 },
     { n: "홍새우 비스크 리조또", e: "Red Shrimp Risotto with Bisque Sauce", d: "호쾌한 사이즈의 홍새우를 통째로, 녹진한 비스크 소스와 감태, 세모가사리", p: 37000 },
     { n: "감자 뇨끼", e: "Porcini Gnocchi", d: "최상급 포르치니버섯의 진한 맛과 향", p: 31000 },
-    { n: "김치볶음밥", e: "Kimchi + F.Rice + S.Eggs + Coke", d: "항정살과 깍두기. 기쁨의 텍스처, 아르쥬 특제 K소울푸드", p: 24000 }
+    { n: "김치볶음밥", e: "Kimchi Fried Rice", d: "항정살과 깍두기. 기쁨의 텍스처, 아르쥬 특제 K소울푸드", p: 24000 }
   ]},
   { t: "DESSERT", items: [
     { n: "말차티라미수", e: "Matcha Tiramisu", d: "이탈리아의 대표적인 낭만 디저트", p: 15000 },
@@ -200,8 +227,8 @@ var DATA = [
 ]},
 { id: "wine", label: "와인", secs: [
   { t: "HOUSE WINE", note: "잔 기준", items: [
-    { n: "테라자스 레제르바 말벡", e: "Terrazas Reserva Malbec (레드)" },
-    { n: "핀카 바카라 예야", e: "Finca Bacara YEYA (화이트)" }
+    { k: "hw-red", n: "테라자스 레제르바 말벡", e: "Terrazas Reserva Malbec", d: "레드" },
+    { k: "hw-white", n: "핀카 바카라 예야", e: "Finca Bacara YEYA", d: "화이트" }
   ]},
   { t: "WHITE WINE", note: "병 기준", items: [
     { c: "France", n: "더 오프닝 보르도 블랑", e: "The Opening Bordeaux Blanc (White Bordeaux Blend)" },
@@ -312,63 +339,226 @@ var DATA = [
 ]}
 ];
 
+var LANGS = [
+  { id: "ko", name: "한국어", sub: "대한민국" },
+  { id: "en", name: "English", sub: "International" },
+  { id: "zh", name: "中文", sub: "中国 · 简体" },
+  { id: "ja", name: "日本語", sub: "日本" }
+];
+var LI = { en: 0, zh: 1, ja: 2 };
+
+var UI = {
+  ko: {
+    tabs: { food: "푸드", drinks: "커피·음료", cocktail: "칵테일·맥주", champagne: "샴페인", wine: "와인", spirits: "위스키·기타", set: "세트" },
+    dm: "DM 문의",
+    ask: "샴페인·와인·위스키 등 술 가격은 인스타그램 DM으로 문의해 주세요.",
+    cur: "가격 단위: 원(KRW)",
+    foot: "가격·예약·단체·제휴 문의는 인스타그램 DM으로 보내주세요.",
+    prepay: "쾌적한 서비스 제공을 위해, 모든 고객님께 사전 결제를 요청드리고 있습니다. 깊은 양해 부탁드립니다.",
+    origin: "[원산지 표기] 소고기(국내산, 호주산) 돼지고기(국내산, 미국산) 오리(국내산) 쌀(국내산) 문어(필리핀) 굴(국내산)"
+  },
+  en: {
+    tabs: { food: "Food", drinks: "Coffee & Drinks", cocktail: "Cocktails & Beer", champagne: "Champagne", wine: "Wine", spirits: "Whisky & Spirits", set: "Sets" },
+    dm: "Ask via DM",
+    ask: "For prices of champagne, wine, whisky and other spirits, please message us on Instagram.",
+    cur: "Prices in Korean won (KRW)",
+    foot: "For prices, reservations, group bookings and partnerships, send us a DM on Instagram.",
+    prepay: "We kindly ask for prepayment as part of our standard policy. Thank you for your understanding.",
+    origin: "Country of origin: beef (Korea, Australia), pork (Korea, USA), duck (Korea), rice (Korea), octopus (Philippines), oyster (Korea)"
+  },
+  zh: {
+    tabs: { food: "美食", drinks: "咖啡饮品", cocktail: "鸡尾酒与啤酒", champagne: "香槟", wine: "葡萄酒", spirits: "威士忌与烈酒", set: "套餐" },
+    dm: "请私信咨询",
+    ask: "香槟、葡萄酒、威士忌等酒类价格，请通过Instagram私信咨询。",
+    cur: "价格单位：韩元（KRW）",
+    foot: "价格、预约、团体与合作咨询，请通过Instagram私信联系我们。",
+    prepay: "为提供舒适的服务，我们要求所有顾客预先付款，感谢您的理解。",
+    origin: "原产地标示：牛肉（韩国、澳大利亚）猪肉（韩国、美国）鸭肉（韩国）大米（韩国）章鱼（菲律宾）牡蛎（韩国）"
+  },
+  ja: {
+    tabs: { food: "フード", drinks: "コーヒー・ドリンク", cocktail: "カクテル・ビール", champagne: "シャンパン", wine: "ワイン", spirits: "ウイスキー・その他", set: "セット" },
+    dm: "DMでお問い合わせ",
+    ask: "シャンパン、ワイン、ウイスキーなどお酒の価格はInstagramのDMでお問い合わせください。",
+    cur: "価格は韓国ウォン（KRW）表示",
+    foot: "価格・ご予約・団体・提携のお問い合わせはInstagramのDMまで。",
+    prepay: "快適なサービスのため、すべてのお客様に事前決済をお願いしております。ご理解のほどよろしくお願いいたします。",
+    origin: "原産地表示：牛肉（韓国産・豪州産）豚肉（韓国産・米国産）鴨肉（韓国産）米（韓国産）タコ（フィリピン産）牡蠣（韓国産）"
+  }
+};
+
+var NOTE = {
+  "18:00 ~ 20:00 · 메인 요리 주문 시 위스퍼링 엔젤 2잔 무료": [
+    "18:00–20:00 · Order any main dish and get 2 glasses of Whispering Angel free",
+    "18:00–20:00 · 点任意主菜，赠送2杯Whispering Angel",
+    "18:00〜20:00 · メイン料理のご注文でWhispering Angelを2杯サービス"],
+  "잔 기준": ["By the glass", "按杯供应", "グラス販売"],
+  "병 기준": ["By the bottle", "按瓶供应", "ボトル販売"],
+  "논알콜 칵테일": ["Non-alcoholic cocktails", "无酒精鸡尾酒", "ノンアルコールカクテル"],
+  "구성 선택형": ["Choose your combination", "可自选组合", "お好みの組み合わせ"],
+  "병 수 기준": ["By number of bottles", "按瓶数", "本数セット"],
+  "샴페인 단품 이벤트 가격": ["Single-bottle champagne event", "香槟单瓶活动", "シャンパン単品イベント"]
+};
+
+var COUNTRY = {
+  "France": ["France", "法国", "フランス"],
+  "Spain": ["Spain", "西班牙", "スペイン"],
+  "New Zealand": ["New Zealand", "新西兰", "ニュージーランド"],
+  "USA": ["USA", "美国", "アメリカ"],
+  "Argentina": ["Argentina", "阿根廷", "アルゼンチン"]
+};
+
+/* 번역: 한글 이름(또는 k)을 키로, [영어, 중국어, 일본어] 각각 [이름, 설명]. 이름이 빈 문자열이면 영문 표기를 그대로 씁니다. */
+function same(n) { return [[n, ""], [n, ""], [n, ""]]; }
+var TR = {
+  "오리다리 콩피": [["", "Tender duck leg, slow-cooked sous-vide and finished with a rich house sauce. A French classic."], ["油封鸭腿", "低温慢煮鸭腿，肉质软嫩，淋上主厨特制酱汁。经典法式料理。"], ["鴨もも肉のコンフィ", "低温調理でしっとり柔らかく仕上げた鴨もも肉に、特製ソースを合わせたフレンチの定番。"]],
+  "오리가슴 스테이크": [["", "Smoked duck breast, slowly pan-seared and basted for crisp skin and a juicy, tender bite."], ["鸭胸排", "烟熏鸭胸慢煎淋油，外皮酥脆，肉质多汁软嫩。"], ["鴨胸肉のステーキ", "スモークした鴨胸肉をじっくり焼き上げ、皮はカリッと中はジューシー。"]],
+  "마라 양갈비": [["", "Lamb rack with mala chili oil and smoked tahini. Bold, aromatic and beautifully plated."], ["麻辣羊排", "麻辣油搭配烟熏芝麻酱，香气浓郁，摆盘精致。"], ["麻辣ラムラック", "麻辣オイルとスモークタヒニで仕上げた、香り高く見た目も華やかなラムラック。"]],
+  "한우등심 스테이크": [["", "Premium Korean Hanwoo striploin, served with refined garnishes and a red wine sauce."], ["韩牛西冷牛排", "精选韩牛西冷，搭配精致配菜与红酒酱汁。"], ["韓牛サーロインステーキ", "厳選した韓牛のストリップロインを、上品な付け合わせと赤ワインソースで。"]],
+  "시저샐러드": [["", "Smoky grilled Caesar salad with a bright, zesty tomato salsa."], ["烤凯撒沙拉", "炭烤香气的凯撒沙拉，搭配清爽的番茄莎莎。"], ["グリルシーザーサラダ", "香ばしく焼いたシーザーサラダに、爽やかなトマトサルサを添えて。"]],
+  "뽈뽀": [["", "Tender Spanish-style octopus with bright Mediterranean flavors."], ["西班牙章鱼", "口感软嫩的西班牙式章鱼，地中海风味。"], ["プルポ・ア・フェイラ", "やわらかく仕上げたスペイン風タコ料理。地中海の味わい。"]],
+  "스모크 비프 타르타르": [["", "Premium raw beef, lightly smoked."], ["烟熏牛肉鞑靼", "轻烟熏制的优质生牛肉。"], ["スモークビーフタルタル", "軽く燻製した上質な生牛肉の前菜。"]],
+  "카르파치오": [["", "Thinly sliced fresh beef with salad. A light, refreshing Italian starter."], ["牛肉卡帕奇欧", "新鲜牛肉薄片配沙拉，清爽开胃的意式前菜。"], ["ビーフカルパッチョ", "新鮮な牛肉の薄切りとサラダ。さっぱりとしたイタリア風の前菜。"]],
+  "살시차 크림 파케리": [["", "Chewy pacchieri pasta in a rich, savory cream sauce."], ["香肠奶油帕凯里意面", "Q弹的帕凯里面，搭配浓郁香滑的奶油酱。"], ["サルシッチャ・クリーム・パッケリ", "もちもち食感のパッケリを、濃厚で香り高いクリームソースで。"]],
+  "까르보나라": [["", "A rich, creamy classic with tagliatelle."], ["经典火腿培根蛋奶意面", "浓郁香滑的经典款，搭配宽扁面。"], ["クラシック・ジャンボンカルボナーラ", "濃厚でクリーミーな王道カルボナーラ。タリアテッレ使用。"]],
+  "아마트리치아나": [["", "Classic pasta in a savory tomato sauce."], ["阿马特里切意面", "番茄酱汁风味的经典意面。"], ["アマトリチャーナ", "旨みたっぷりのトマトソースのパスタ。"]],
+  "봉골레": [["", "Italy's beloved clam pasta."], ["蛤蜊意面", "意大利人气十足的蛤蜊意面。"], ["ボンゴレ", "イタリアで愛されるアサリのパスタ。"]],
+  "라자냐": [["", "Layers of pecorino cheese and rich white ragu, finished with a fresh chive gremolata."], ["白酱拉古千层面", "佩科里诺奶酪与浓郁白拉古酱层层叠加，点缀清新的韭菜香草碎。"], ["ホワイトラグーのラザニア", "ペコリーノチーズと濃厚なホワイトラグーを重ね、ニラのグレモラータで爽やかに。"]],
+  "라구 파스타": [["", "Wide ribbons of pappardelle in a slow-simmered, deeply savory meat ragu."], ["肉酱宽面", "宽扁面搭配慢火熬煮的浓郁肉酱，鲜香醇厚。"], ["ラグーパッパルデッレ", "じっくり煮込んだ濃厚なミートラグーを、幅広のパッパルデッレに絡めて。"]],
+  "홍새우 비스크 리조또": [["", "Creamy risotto with a whole jumbo red shrimp, rich bisque sauce and seaweed."], ["红虾浓汤烩饭", "整只大红虾搭配浓郁龙虾浓汤酱汁与海藻的烩饭。"], ["赤エビのビスクリゾット", "大ぶりの赤エビを丸ごと一尾使用。濃厚なビスクソースと海藻の風味。"]],
+  "감자 뇨끼": [["", "Pillowy gnocchi with the deep aroma and flavor of premium porcini mushrooms."], ["牛肝菌土豆团子", "软糯土豆团子，散发优质牛肝菌的浓郁香气。"], ["ポルチーニのニョッキ", "上質なポルチーニ茸の豊かな香りと旨みを味わうニョッキ。"]],
+  "김치볶음밥": [["Kimchi Fried Rice", "Kimchi fried rice with pork jowl and crunchy radish kimchi. ARZU's signature Korean comfort food."], ["泡菜炒饭", "搭配猪颈肉与脆爽萝卜泡菜。ARZU招牌韩式家常风味。"], ["キムチチャーハン", "豚トロとカクテキ（大根キムチ）を添えて。ARZUの看板Kソウルフード。"]],
+  "말차티라미수": [["", "Italy's classic dessert, made with matcha."], ["抹茶提拉米苏", "以抹茶演绎意大利经典甜点。"], ["抹茶ティラミス", "イタリアの定番デザートを抹茶で。"]],
+  "클래식 바스크 치즈케이크": [["", "Rich, silky Basque-style cheesecake. Homemade, in small bites."], ["经典巴斯克芝士蛋糕", "浓郁绵滑的巴斯克芝士蛋糕，自家手工制作，小份精致。"], ["クラシック・バスクチーズケーキ", "濃厚でなめらかな自家製バスクチーズケーキ。ひと口サイズも。"]],
+  "햄&치즈 플래터": [["", "Chorizo, jambon (French ham), Gouda, cream cheese and nuts."], ["火腿奶酪拼盘", "西班牙辣香肠、法式火腿、高达奶酪、奶油奶酪与坚果。"], ["ハム&チーズプレート", "チョリソ、ジャンボン（フランス産ハム）、ゴーダ、クリームチーズ、ナッツ。"]],
+  "과일 플래터": [["", "Fresh seasonal fruit that pairs well with whisky."], ["水果拼盘", "新鲜时令水果，很适合搭配威士忌。"], ["フルーツプレート", "新鮮な旬のフルーツ。ウイスキーとの相性も◎。"]],
+  "과일&치즈 플래터": [["", "Seasonal fruit with ham, cheese, olives and nuts."], ["水果奶酪拼盘", "时令水果搭配火腿、奶酪、橄榄与坚果。"], ["フルーツ&チーズプレート", "旬のフルーツ、ハム、チーズ、オリーブ、ナッツの盛り合わせ。"]],
+
+  "살시차 크림 파케리 + 위스퍼링 엔젤": [["Salsiccia Cream Pacchieri + Whispering Angel", ""], ["香肠奶油帕凯里意面 + Whispering Angel", ""], ["サルシッチャ・クリーム・パッケリ + Whispering Angel", ""]],
+  "카르파치오 + 위스퍼링 엔젤": [["Beef Carpaccio + Whispering Angel", ""], ["牛肉卡帕奇欧 + Whispering Angel", ""], ["ビーフカルパッチョ + Whispering Angel", ""]],
+  "라자냐 + 위스퍼링 엔젤": [["Lasagne with White Ragu + Whispering Angel", ""], ["白酱拉古千层面 + Whispering Angel", ""], ["ホワイトラグーのラザニア + Whispering Angel", ""]],
+  "오리다리 콩피 + 위스퍼링 엔젤": [["Confit de Canard + Whispering Angel", ""], ["油封鸭腿 + Whispering Angel", ""], ["鴨もも肉のコンフィ + Whispering Angel", ""]],
+
+  "아메리카노": [["", ""], ["美式咖啡", ""], ["アメリカーノ", ""]],
+  "카페라떼": [["", ""], ["拿铁咖啡", ""], ["カフェラテ", ""]],
+  "바닐라 라떼": [["", ""], ["香草拿铁", ""], ["バニララテ", ""]],
+  "쥬스": [["", "Grapefruit, orange, cranberry, pineapple"], ["果汁", "葡萄柚、橙子、蔓越莓、菠萝"], ["ジュース", "グレープフルーツ、オレンジ、クランベリー、パイナップル"]],
+  "논알콜 피나콜라다": [["Non-alcoholic Piña Colada", ""], ["无酒精椰林飘香", ""], ["ノンアルコール ピニャコラーダ", ""]],
+  "논알콜 모히또": [["Non-alcoholic Mojito", ""], ["无酒精莫吉托", ""], ["ノンアルコール モヒート", ""]],
+  "논알콜 베리 키스": [["Non-alcoholic Berry Kiss", ""], ["无酒精Berry Kiss", ""], ["ノンアルコール ベリーキス", ""]],
+  "코카 콜라": [["", ""], ["可口可乐", ""], ["コカ・コーラ", ""]],
+  "코카 콜라 제로": [["", ""], ["零度可口可乐", ""], ["コカ・コーラ ゼロ", ""]],
+  "스프라이트": [["", ""], ["雪碧", ""], ["スプライト", ""]],
+  "진저 에일": [["", ""], ["姜汁汽水", ""], ["ジンジャーエール", ""]],
+  "클럽 소다": [["", ""], ["苏打水", ""], ["クラブソーダ", ""]],
+  "토닉워터": [["", ""], ["汤力水", ""], ["トニックウォーター", ""]],
+  "에너지 드링크": [["", ""], ["能量饮料", ""], ["エナジードリンク", ""]],
+
+  "hw-red": [["Terrazas Reserva Malbec", "Red wine"], ["Terrazas Reserva Malbec", "红葡萄酒"], ["Terrazas Reserva Malbec", "赤ワイン"]],
+  "hw-white": [["Finca Bacara YEYA", "White wine"], ["Finca Bacara YEYA", "白葡萄酒"], ["Finca Bacara YEYA", "白ワイン"]],
+
+  "모엣 샹동 임페리얼": same("Moët & Chandon Impérial"),
+  "모엣 샹동 로제": same("Moët & Chandon ROSE"),
+  "모엣 샹동 NIRO": same("Moët & Chandon NIRO"),
+  "모엣 샹동 브뤼 임페리얼 골든 라이트업 매그넘 리미티드 1.5L": same("Moët & Chandon Impérial Golden Light Up Magnum Limited 1.5L"),
+  "돔페리뇽 루미너스": same("Dom Pérignon Luminous"),
+  "아르망드 브리냑 골드": same("Armand de Brignac Brut Gold"),
+  "딥 아이스": same("Deep Ice"),
+  "골든블랑 블루 미드나잇 루미너스": same("Golden Blanc Blue Midnight Luminous"),
+
+  "딥 아이스 1": [["Deep Ice × 1", "+ choose 1: Crafter's Gin / Sierra Tequila / Sierra Tequila Café / Belvedere / ROEL Zero Sugar Premium Liqueur"], ["Deep Ice 1瓶", "+ 任选1款：Crafter's 金酒 / Sierra 龙舌兰 / Sierra 咖啡龙舌兰 / Belvedere 伏特加 / ROEL 零糖利口酒"], ["Deep Ice 1本", "+ 以下から1本選択：Crafter's ジン / シエラ テキーラ / シエラ テキーラ カフェ / ベルヴェデール / ROEL ゼロシュガー リキュール"]],
+  "모엣 샹동 임페리얼 1": [["Moët & Chandon Impérial × 1", "+ choose 1: Crafter's Gin / Sierra Tequila / Sierra Tequila Café / Belvedere / ROEL Zero Sugar Premium Liqueur"], ["Moët & Chandon Impérial 1瓶", "+ 任选1款：Crafter's 金酒 / Sierra 龙舌兰 / Sierra 咖啡龙舌兰 / Belvedere 伏特加 / ROEL 零糖利口酒"], ["Moët & Chandon Impérial 1本", "+ 以下から1本選択：Crafter's ジン / シエラ テキーラ / シエラ テキーラ カフェ / ベルヴェデール / ROEL ゼロシュガー リキュール"]],
+  "조니워커 블루 + 모엣 샹동 임페리얼 2병": [["Johnnie Walker Blue + 2 Moët & Chandon Impérial", "Includes a generous fruit & cheese platter"], ["Johnnie Walker Blue + 2瓶 Moët & Chandon Impérial", "含丰盛水果奶酪拼盘"], ["Johnnie Walker Blue + Moët & Chandon Impérial 2本", "豪華なフルーツ&チーズプレート付き"]],
+  "돈훌리오 1942 + 모엣 샹동 임페리얼 2병": [["Don Julio 1942 + 2 Moët & Chandon Impérial", "Includes a generous fruit & cheese platter"], ["Don Julio 1942 + 2瓶 Moët & Chandon Impérial", "含丰盛水果奶酪拼盘"], ["Don Julio 1942 + Moët & Chandon Impérial 2本", "豪華なフルーツ&チーズプレート付き"]]
+};
+
+var LATIN = /^[\u0000-ɏ -⁯×+&\s]+$/;
+var lang = "ko";
+var curTab = "food";
+
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 function won(n) { return Number(n).toLocaleString("ko-KR"); }
 
-var SHOW_PRICES = false; /* 가격은 DM 문의: true로 바꾸면 가격이 다시 표시됩니다 */
-function priceHtml(it) {
-  if (it.p != null && it.g != null) {
-    return '<span class="row"><small>병</small>' + won(it.p) + '</span><span class="row"><small>잔</small>' + won(it.g) + '</span>';
-  }
-  if (it.g != null) return '<span class="row"><small>잔</small>' + won(it.g) + '</span>';
-  if (it.o != null) return '<s>' + won(it.o) + '</s>' + won(it.p);
-  return won(it.p);
+function bottles(e) {
+  var n = parseInt(e, 10);
+  if (lang === "zh") return n + "瓶";
+  if (lang === "ja") return n + "本";
+  return n + (n === 1 ? " bottle" : " bottles");
+}
+
+function view(it) {
+  var isBottle = /^\d+ BOTTLES$/.test(it.e || "");
+  if (lang === "ko") return { name: it.n, sub: it.e || "", desc: it.d || "" };
+  var r = TR[it.k || it.n];
+  var t = r ? r[LI[lang]] : null;
+  var name = (t && t[0]) || (isBottle ? it.n : it.e) || it.n;
+  var sub = "";
+  if (isBottle) sub = bottles(it.e);
+  else if (lang !== "en" && t && t[0] && it.e && it.e !== name && !LATIN.test(name)) sub = it.e;
+  return { name: name, sub: sub, desc: (t && t[1]) || "" };
 }
 
 function itemHtml(it, ask, priced) {
+  var v = view(it);
   var h = '<li class="item"><div class="l">';
-  if (it.c) h += '<span class="tag">' + esc(it.c) + '</span>';
-  h += '<span class="ko">' + esc(it.n) + '</span>';
-  if (it.e) h += '<span class="en">' + esc(it.e) + '</span>';
-  if (it.d) h += '<span class="desc">' + esc(it.d) + '</span>';
-  h += '</div>' + ((SHOW_PRICES || priced) ? '<div class="price">' + priceHtml(it) + '</div>' : (ask ? '<div class="dmq">DM 문의</div>' : '')) + '</li>';
-  return h;
+  if (it.c) h += '<span class="tag">' + esc(lang === "ko" ? it.c : (COUNTRY[it.c] ? COUNTRY[it.c][LI[lang] === undefined ? 0 : LI[lang]] : it.c)) + '</span>';
+  h += '<span class="ko">' + esc(v.name) + '</span>';
+  if (v.sub) h += '<span class="en">' + esc(v.sub) + '</span>';
+  if (v.desc) h += '<span class="desc">' + esc(v.desc) + '</span>';
+  h += '</div>';
+  if (priced && it.p != null) h += '<div class="price">' + won(it.p) + '</div>';
+  else if (ask) h += '<div class="dmq">' + esc(UI[lang].dm) + '</div>';
+  return h + '</li>';
+}
+
+function noteText(n) {
+  if (lang === "ko" || !NOTE[n]) return lang === "ko" ? n : "";
+  return NOTE[n][LI[lang]];
 }
 
 function secHtml(s, ask, priced) {
   var h = '<section class="sec ' + (s.cls || "") + '"><h2>' + esc(s.t) + '</h2>';
-  if (s.note) h += '<p class="note">' + esc(s.note) + '</p>';
-  if (s.grid && (ask || priced)) {
-    h += '<ul class="list">' + s.grid.map(function (g) { return itemHtml({ n: g[0], e: g[1], p: s.flat }, ask, priced); }).join("") + '</ul>';
-  } else if (s.grid) {
-    h += '<ul class="grid">' + s.grid.map(function (g) {
-      return '<li><span class="ko">' + esc(g[0]) + '</span><span class="en">' + esc(g[1]) + '</span></li>';
-    }).join("") + '</ul>';
-  } else {
-    h += '<ul class="list">' + s.items.map(function (it) { return itemHtml(it, ask, priced); }).join("") + '</ul>';
-  }
+  var note = s.note ? noteText(s.note) : "";
+  if (note) h += '<p class="note">' + esc(note) + '</p>';
+  var items = s.grid ? s.grid.map(function (g) { return { n: g[0], e: g[1], p: s.flat }; }) : s.items;
+  h += '<ul class="list">' + items.map(function (it) { return itemHtml(it, ask, priced); }).join("") + '</ul>';
   return h + '</section>';
 }
 
 var ASK_TABS = ["cocktail", "champagne", "wine", "spirits", "set"]; /* 술 탭: 각 줄 옆에 DM 문의 표시 */
-var PRICE_TABS = ["food", "drinks", "cocktail"]; /* 가격을 보여주는 탭: 칵테일·맥주 */
-var tabsEl = document.getElementById("tabs");
-var panelsEl = document.getElementById("panels");
-DATA.forEach(function (d) {
-  var b = document.createElement("button");
-  b.className = "tab"; b.type = "button"; b.id = "tab-" + d.id;
-  b.setAttribute("role", "tab"); b.setAttribute("aria-controls", "panel-" + d.id);
-  b.textContent = d.label;
-  b.addEventListener("click", function () { show(d.id, true); });
-  tabsEl.appendChild(b);
-  var p = document.createElement("div");
-  p.id = "panel-" + d.id; p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", "tab-" + d.id);
-  p.innerHTML = d.secs.map(function (s) { return secHtml(s, ASK_TABS.indexOf(d.id) >= 0, PRICE_TABS.indexOf(d.id) >= 0); }).join("");
-  panelsEl.appendChild(p);
-});
+var PRICE_TABS = ["food", "drinks", "cocktail"]; /* 가격을 보여주는 탭 */
+
+function render() {
+  var u = UI[lang];
+  document.documentElement.lang = lang;
+  var tabsEl = document.getElementById("tabs");
+  var panelsEl = document.getElementById("panels");
+  tabsEl.innerHTML = "";
+  panelsEl.innerHTML = "";
+  DATA.forEach(function (d) {
+    var b = document.createElement("button");
+    b.className = "tab"; b.type = "button"; b.id = "tab-" + d.id;
+    b.setAttribute("role", "tab"); b.setAttribute("aria-controls", "panel-" + d.id);
+    b.textContent = u.tabs[d.id];
+    b.addEventListener("click", function () { show(d.id, true); });
+    tabsEl.appendChild(b);
+    var p = document.createElement("div");
+    p.id = "panel-" + d.id; p.setAttribute("role", "tabpanel"); p.setAttribute("aria-labelledby", "tab-" + d.id);
+    p.innerHTML = d.secs.map(function (s) { return secHtml(s, ASK_TABS.indexOf(d.id) >= 0, PRICE_TABS.indexOf(d.id) >= 0); }).join("");
+    panelsEl.appendChild(p);
+  });
+  document.getElementById("ask").textContent = u.ask;
+  document.getElementById("cur").textContent = u.cur;
+  document.getElementById("foot").innerHTML =
+    '<p class="dm">' + esc(u.foot) + '</p><p>' + esc(u.prepay) + '</p><p>' + esc(u.origin) + '</p>';
+  Array.prototype.forEach.call(document.querySelectorAll(".lang-btn"), function (b) {
+    b.setAttribute("aria-pressed", b.getAttribute("data-lang") === lang ? "true" : "false");
+  });
+  show(curTab, false);
+}
 
 function show(id, push) {
   if (!DATA.some(function (d) { return d.id === id; })) id = DATA[0].id;
+  curTab = id;
   DATA.forEach(function (d) {
     var on = d.id === id;
     document.getElementById("panel-" + d.id).hidden = !on;
@@ -378,8 +568,43 @@ function show(id, push) {
   });
   if (push) { try { history.replaceState(null, "", "#" + id); } catch (e) { location.hash = id; } window.scrollTo(0, 0); }
 }
+
+function setLang(id, remember) {
+  lang = id;
+  if (remember) { try { localStorage.setItem("arzu_lang", id); } catch (e) {} }
+  document.getElementById("gate").hidden = true;
+  render();
+}
+
+function buildLangButtons() {
+  var gl = document.getElementById("gatelist");
+  var sw = document.getElementById("langs");
+  LANGS.forEach(function (l) {
+    var g = document.createElement("button");
+    g.type = "button"; g.className = "gate-btn";
+    g.innerHTML = '<span class="gate-name">' + esc(l.name) + '</span><span class="gate-sub-l">' + esc(l.sub) + '</span>';
+    g.addEventListener("click", function () { setLang(l.id, true); });
+    gl.appendChild(g);
+    var s = document.createElement("button");
+    s.type = "button"; s.className = "lang-btn"; s.setAttribute("data-lang", l.id);
+    s.textContent = l.name;
+    s.addEventListener("click", function () { setLang(l.id, true); });
+    sw.appendChild(s);
+  });
+}
+
+buildLangButtons();
 window.addEventListener("hashchange", function () { show(location.hash.slice(1), false); });
-show(location.hash.slice(1), false);
+curTab = location.hash.slice(1) || "food";
+var saved = null;
+try { saved = localStorage.getItem("arzu_lang"); } catch (e) {}
+if (saved && UI[saved]) { lang = saved; render(); }
+else {
+  render();
+  document.getElementById("gate").hidden = false;
+  var first = document.querySelector(".gate-btn");
+  if (first) first.focus();
+}
 </script>
 </body>
 </html>
