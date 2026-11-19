@@ -95,6 +95,11 @@ html[lang="ja"] body, html[lang="ja"] button { font-family: "Noto Sans JP", "Not
 .pp { display: block; margin-top: 6px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .pp.dmq { font-size: 12px; font-weight: 500; color: var(--accent); }
 .thumb { flex: none; width: 88px; height: 88px; border-radius: 10px; object-fit: cover; background: var(--line); display: block; align-self: flex-start; }
+html[lang="ko"] body { word-break: keep-all; overflow-wrap: break-word; }
+html[lang="en"] body { overflow-wrap: break-word; }
+html[lang="zh"] body, html[lang="ja"] body { line-break: strict; overflow-wrap: break-word; }
+.desc, .note, .ask, .cur, footer p, .gate-sub { text-wrap: pretty; }
+.dmq { white-space: nowrap; }
 </style>
 </head>
 <body>
