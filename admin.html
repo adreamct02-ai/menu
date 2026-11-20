@@ -593,6 +593,23 @@ function commaFmt(v) { var d = String(v == null ? "" : v).replace(/\D/g, "").rep
 function rawNum(v) { return String(v || "").replace(/\D/g, ""); }
 function moneyInput(inp) { inp.type = "text"; inp.inputMode = "numeric"; inp.autocomplete = "off"; inp.value = commaFmt(inp.value); inp.addEventListener("input", function () { inp.value = commaFmt(inp.value); }); return inp; }
 moneyInput($("eSales"));
+/* Tapping a button while the keyboard is up: iOS closes the keyboard first and the sheet shifts,
+   so the tap lands on another field. Handle the tap ourselves, before anything moves. */
+(function () {
+  var ts = null;
+  document.addEventListener("touchstart", function (e) {
+    var b = e.target.closest && e.target.closest("dialog button"), a = document.activeElement, t = e.touches[0];
+    if (!b || e.touches.length > 1 || !a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) { ts = null; return; }
+    ts = { b: b, x: t.clientX, y: t.clientY }; e.preventDefault();
+  }, { passive: false });
+  document.addEventListener("touchend", function (e) {
+    if (!ts) return; var t = e.changedTouches[0], c = ts; ts = null;
+    e.preventDefault();
+    if (Math.abs(t.clientX - c.x) < 12 && Math.abs(t.clientY - c.y) < 12 && !c.b.disabled) c.b.click();
+  }, { passive: false });
+  document.addEventListener("touchcancel", function () { ts = null; }, { passive: true });
+})();
+
 /* ---------- edit dialog ---------- */
 function openEdit(x) {
   editing = x || null; $("eErr").textContent = "";
