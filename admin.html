@@ -848,11 +848,31 @@ function openSeat(id, mode, noSync, notice) {
       area.appendChild(pg);
     }
     if (!mine.length) box.appendChild(el("p", "note", "이 담당의 대기 중인 예약이 없어요."));
-    if (sit.length) {
-      area.appendChild(el("h3", "sub", "이미 앉은 손님 · 좌석 추가"));
-      var b2 = el("div", "cand"); sit.forEach(function (x) { var r = el("button", "crow"); r.type = "button"; var t = el("div"); t.appendChild(el("b", null, x.name + " · " + x.party_size + "명")); t.appendChild(el("small", null, "현재 " + (x.seat || "-"))); r.appendChild(t); r.appendChild(el("span", "go ghost", "좌석 추가")); r.addEventListener("click", function () { seatNow(x, true); }); b2.appendChild(r); }); area.appendChild(b2);
+  }
+  /* already-seated guests: add this seat to them (any staff, any mode) */
+  var addBox = el("div", "addbox"), apage = 0;
+  function drawAdd() {
+    addBox.innerHTML = "";
+    var ls2 = lastStaff();
+    var list = sitting.filter(function (x) { return seatList(x).indexOf(id) < 0; }).sort(function (a, b) { return ((b.staff === ls2) - (a.staff === ls2)) || a.name.localeCompare(b.name); });
+    if (!list.length) return;
+    addBox.appendChild(el("h3", "sub", "이미 앉은 손님 · 좌석 추가"));
+    var pages = Math.ceil(list.length / PER); if (apage >= pages) apage = pages - 1;
+    var cb = el("div", "cand");
+    list.slice(apage * PER, apage * PER + PER).forEach(function (x) {
+      var r = el("button", "crow"); r.type = "button"; var t = el("div"); t.appendChild(el("b", null, x.name + " · " + x.party_size + "명"));
+      t.appendChild(el("small", null, "현재 " + (x.seat || "-") + (x.staff ? " · 담당 " + x.staff : "")));
+      r.appendChild(t); r.appendChild(el("span", "go ghost", "좌석 추가")); r.addEventListener("click", function () { seatNow(x, true); }); cb.appendChild(r);
+    });
+    addBox.appendChild(cb);
+    if (pages > 1) {
+      var pg = el("div", "pager");
+      function ab(label, to, on) { var b = el("button", null, label); b.type = "button"; b.setAttribute("aria-pressed", on ? "true" : "false"); b.disabled = to < 0 || to >= pages; b.addEventListener("click", function () { apage = to; drawAdd(); }); pg.appendChild(b); }
+      ab("‹", apage - 1, false); for (var q = 0; q < pages; q++) ab(String(q + 1), q, q === apage); ab("›", apage + 1, false);
+      addBox.appendChild(pg);
     }
   }
+  body.appendChild(addBox); drawAdd();
   draw(); body.appendChild(err); close(); showSeat();
 }
 var Z = 1, ZL = [1, 1.8, 2.6, 3.5];
