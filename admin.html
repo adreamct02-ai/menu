@@ -589,6 +589,8 @@ moneyInput($("eSales"));
     ["dlg", "sDlg"].forEach(function (id) {
       var d = $(id); if (!d.open) { d.style.removeProperty("bottom"); d.style.removeProperty("top"); d.style.removeProperty("max-height"); return; }
       var kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      /* only react while the keyboard is really up; otherwise use the normal bottom-sheet CSS */
+      if (kb < 120 || !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || "")) { d.style.removeProperty("bottom"); d.style.removeProperty("top"); d.style.removeProperty("max-height"); return; }
       d.style.setProperty("top", "auto", "important"); d.style.setProperty("bottom", kb + "px", "important");
       d.style.setProperty("max-height", Math.max(200, vv.height - 24) + "px", "important");
     });
@@ -598,7 +600,8 @@ moneyInput($("eSales"));
     var t = e.target; if (!t.closest || !t.closest("dialog")) return;
     setTimeout(function () { fit(); try { t.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (x) {} }, 320);
   });
-  document.addEventListener("focusout", function () { setTimeout(fit, 300); });
+  document.addEventListener("focusout", function () { setTimeout(fit, 100); setTimeout(fit, 450); setTimeout(fit, 1000); });
+  ["dlg", "sDlg"].forEach(function (id) { $(id).addEventListener("close", function () { fit(); }); });
 })();
 
 /* ---------- edit dialog ---------- */
