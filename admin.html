@@ -188,6 +188,10 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .dlg-acts { flex-wrap:wrap; }
 .dlg-acts .err { flex:0 0 100%; margin:0; font-weight:700; }
 .dlg-acts .err:empty { display:none; }
+.pager { display:flex; justify-content:center; gap:8px; margin:6px 0 2px; flex-wrap:wrap; }
+.pager button { min-width:44px; min-height:44px; border:1px solid var(--line); background:#fff; border-radius:12px; font-weight:600; font-size:16px; }
+.pager button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
+.pager button:disabled { opacity:.35; }
 .mvseats { margin-top:10px; }
 .mvseats .note { flex:0 0 100%; margin:0; }
 .mvseats button { min-height:40px; padding:0 14px; }
@@ -798,12 +802,13 @@ function openSeat(id, mode, noSync, notice) {
     var cur = extra ? seatList(x).concat([id]) : [id];
     return saveSeat(x, cur.join(", "), x.status === "visited" ? null : "visited").then(function () { done(id + "에 " + x.name + " 님을 앉혔어요."); }).catch(fail);
   }
+  var page = 0, PER = 3;
   function draw() {
     chipBox.innerHTML = "";
     var opts = names.map(function (n) { return [n, n + " (" + cnt[n] + ")"]; });
     if (cnt._none) opts.push(["_none", "담당 없음 (" + cnt._none + ")"]);
     opts.push(["walk", "예약 없이 온 손님"]);
-    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; if (sel !== "walk" && sel !== "_none") saveStaff(sel); draw(); }); chipBox.appendChild(b); });
+    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; page = 0; if (sel !== "walk" && sel !== "_none") saveStaff(sel); draw(); }); chipBox.appendChild(b); });
     area.innerHTML = ""; err.textContent = "";
     if (!sel) { area.appendChild(el("p", "note", "위에서 내 이름을 누르면 내 예약 손님이 떠요.")); return; }
     if (sel === "walk") {
@@ -825,7 +830,8 @@ function openSeat(id, mode, noSync, notice) {
     }
     var mine = waiting.filter(function (x) { return (x.staff || "_none") === sel; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
     var box = el("div", "cand");
-    mine.forEach(function (x) {
+    var pages = Math.max(1, Math.ceil(mine.length / PER)); if (page >= pages) page = pages - 1;
+    mine.slice(page * PER, page * PER + PER).forEach(function (x) {
       var r = el("button", "crow"); r.type = "button"; var t = el("div");
       t.appendChild(el("b", null, x.name + " · " + x.party_size + "명"));
       var sm = []; if (seatList(x).length) sm.push("현재 " + x.seat + " → 이 자리로 이동"); if (x.request) sm.push(x.request); t.appendChild(el("small", null, sm.join(" · ") || "탭하면 이 자리에 앉아요"));
@@ -834,6 +840,14 @@ function openSeat(id, mode, noSync, notice) {
     });
     var sit = sitting.filter(function (x) { return (x.staff || "_none") === sel; });
     area.appendChild(box);
+    if (pages > 1) {
+      var pg = el("div", "pager");
+      function pb(label, to, on, aria) { var b = el("button", null, label); b.type = "button"; if (aria) b.setAttribute("aria-label", aria); b.setAttribute("aria-pressed", on ? "true" : "false"); b.disabled = to < 0 || to >= pages; b.addEventListener("click", function () { page = to; draw(); }); pg.appendChild(b); }
+      pb("‹", page - 1, false, "이전");
+      for (var q = 0; q < pages; q++) pb(String(q + 1), q, q === page);
+      pb("›", page + 1, false, "다음");
+      area.appendChild(pg);
+    }
     if (!mine.length) box.appendChild(el("p", "note", "이 담당의 대기 중인 예약이 없어요."));
     if (sit.length) {
       area.appendChild(el("h3", "sub", "이미 앉은 손님 · 자리 추가"));
