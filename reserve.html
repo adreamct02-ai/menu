@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ARZU Reservation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root { --paper:#ecebe7; --card:#f6f5f2; --ink:#17120f; --muted:#6b645d; --line:#cfcbc4; --accent:#7a1016; --ok:#1f6b3a;
+  --font-display:"DM Serif Display","Noto Serif KR",Georgia,serif; --font-body:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif; color-scheme: light; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.5; word-break:keep-all; overflow-wrap:break-word; }
+html[lang="en"] body { word-break:normal; }
+html[lang="zh"] body, html[lang="ja"] body { word-break:normal; line-break:strict; }
+html[lang="zh"] body, html[lang="zh"] button, html[lang="zh"] input, html[lang="zh"] select, html[lang="zh"] textarea { font-family:"Noto Sans SC","Noto Sans KR",system-ui,sans-serif; }
+html[lang="ja"] body, html[lang="ja"] button, html[lang="ja"] input, html[lang="ja"] select, html[lang="ja"] textarea { font-family:"Noto Sans JP","Noto Sans KR",system-ui,sans-serif; }
+.wrap { max-width:520px; margin:0 auto; padding:24px 16px 48px; }
+.top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.brand { font-family:var(--font-display); font-weight:400; font-size:40px; letter-spacing:.1em; line-height:1; margin:0; }
+.langs { display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; }
+.lang-btn { border:1px solid var(--line); background:transparent; color:var(--muted); font:500 12px var(--font-body); padding:5px 9px; border-radius:999px; cursor:pointer; }
+.lang-btn[aria-pressed="true"] { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+h1.title { font-size:22px; margin:22px 0 4px; font-weight:700; }
+.lead { margin:0 0 18px; color:var(--muted); font-size:14px; }
+.notice { background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); padding:10px 12px; font-size:13px; margin:0 0 18px; }
+form { display:grid; gap:16px; }
+label, .lbl { display:block; font-weight:700; font-size:14px; margin-bottom:6px; }
+.opt { font-weight:400; color:var(--muted); font-size:12px; margin-left:4px; }
+input[type=text], input[type=date], input[type=number], select, textarea {
+  width:100%; font:inherit; font-size:16px; padding:12px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--ink); }
+textarea { min-height:84px; resize:vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.hint { font-size:12.5px; color:var(--muted); margin:6px 0 0; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { position:relative; }
+.chip input { position:absolute; opacity:0; inset:0; }
+.chip span { display:block; padding:9px 13px; border:1px solid var(--line); border-radius:999px; background:#fff; font-size:14px; cursor:pointer; }
+.chip input:checked + span { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+.chip input:focus-visible + span { outline:2px solid var(--accent); outline-offset:2px; }
+.consent { display:flex; gap:10px; align-items:flex-start; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:13px; }
+.consent input { width:20px; height:20px; margin-top:2px; flex:none; }
+.err { color:var(--accent); font-size:13.5px; font-weight:500; min-height:1.2em; }
+.submit { font:700 16px var(--font-body); padding:15px; border:0; border-radius:12px; background:var(--accent); color:#fff; cursor:pointer; }
+.submit[disabled] { opacity:.55; cursor:default; }
+.hp { position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+.done { text-align:center; padding:28px 8px; }
+.done .code { font-family:var(--font-display); font-size:44px; letter-spacing:.14em; margin:10px 0; }
+.done h2 { font-size:21px; margin:0 0 6px; }
+.done p { margin:8px 0; color:var(--muted); }
+.done a.btn { display:inline-block; margin-top:14px; padding:12px 20px; border-radius:999px; background:var(--ink); color:var(--paper); text-decoration:none; font-weight:700; }
+[hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <p class="brand">ARZU</p>
+    <div class="langs" id="langs" role="group" aria-label="Language"></div>
+  </div>
+
+  <div id="formView">
+    <h1 class="title" id="tTitle"></h1>
+    <p class="lead" id="tLead"></p>
+    <p class="notice" id="tNotice"></p>
+    <form id="f" novalidate autocomplete="on">
+      <div>
+        <label for="name" id="lName"></label>
+        <input type="text" id="name" maxlength="60" autocomplete="name">
+      </div>
+      <div class="row2">
+        <div>
+          <label for="date" id="lDate"></label>
+          <input type="date" id="date">
+        </div>
+        <div>
+          <label for="time" id="lTime"></label>
+          <select id="time"></select>
+        </div>
+      </div>
+      <div>
+        <label for="party" id="lParty"></label>
+        <input type="number" id="party" min="1" max="20" value="2" inputmode="numeric">
+        <p class="hint" id="hParty"></p>
+      </div>
+      <div>
+        <span class="lbl" id="lContact"></span>
+        <div class="chips" id="ctypes" role="radiogroup" aria-labelledby="lContact"></div>
+        <div style="margin-top:10px" id="cvalWrap">
+          <input type="text" id="cval" maxlength="80" aria-labelledby="lContact">
+        </div>
+        <p class="hint" id="hContact"></p>
+      </div>
+      <div>
+        <label for="req" id="lReq"></label>
+        <textarea id="req" maxlength="500"></textarea>
+      </div>
+      <div class="hp" aria-hidden="true"><label>Website <input type="text" id="website" tabindex="-1" autocomplete="off"></label></div>
+      <label class="consent" for="consent">
+        <input type="checkbox" id="consent">
+        <span id="tConsent"></span>
+      </label>
+      <p class="err" id="err" role="alert"></p>
+      <button type="submit" class="submit" id="go"></button>
+    </form>
+  </div>
+
+  <div id="doneView" class="done" hidden>
+    <h2 id="dTitle"></h2>
+    <div class="code" id="dCode"></div>
+    <p id="dBody"></p>
+    <p id="dDm" hidden></p>
+    <a class="btn" id="dBtn" href="https://www.instagram.com/arzu_raon/" target="_blank" rel="noopener" hidden>Instagram @arzu_raon</a>
+  </div>
+</div>
+
+<script>
+var SB = "https://txdoqsktqlgrngqxavqu.supabase.co";
+var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4ZG9xc2t0cWxncm5ncXhhdnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzE4NTAsImV4cCI6MjExMDc0Nzg1MH0.GWwbAqVX6QliEIlQMb2TWEgqxe43lOUVsfHEhJgUVZ4";
+
+var LANGS = [["ko","한국어"],["en","English"],["zh","中文"],["ja","日本語"]];
+var T = {
+  ko: {
+    title:"예약 신청", lead:"청담 ARZU 예약을 신청해 주세요.",
+    notice:"신청이 곧 확정은 아니에요. 팀이 확인한 뒤 연락드려요. 예약금은 받지 않아요. 월요일은 휴무예요.",
+    name:"이름", date:"방문 날짜", time:"방문 시간", timePh:"시간 선택", party:"인원", partyHint:"20명을 넘으면 인스타그램 DM으로 문의해 주세요.",
+    contact:"연락 방법", contactHint:"확정 안내를 받을 연락처를 골라 주세요.",
+    types:{phone:"전화번호", instagram:"인스타그램", kakao:"카카오톡", wechat:"WeChat", line:"LINE", none:"연락처 남기지 않기"},
+    ph:{phone:"010-0000-0000", instagram:"@아이디", kakao:"카카오톡 아이디", wechat:"WeChat ID", line:"LINE ID"},
+    noneHint:"연락처를 남기지 않으면, 신청 후 받는 예약번호를 라온 인스타그램 DM으로 보내 주세요.",
+    req:"요청사항", reqOpt:"(선택)", name_opt:"",
+    consent:"예약 안내를 위해 이름과 연락처를 수집하는 데 동의해요. 정보는 예약 안내 목적으로만 쓰이고, 목적이 끝나면 삭제돼요.",
+    go:"예약 신청하기", going:"보내는 중…",
+    done:"예약 신청이 접수됐어요", doneBody:"팀이 확인한 뒤 남겨주신 연락처로 확정 안내를 드려요.",
+    doneNone:"연락처를 남기지 않으셨어요. 아래 예약번호를 라온 인스타그램 DM으로 보내 주세요.",
+    ig:"인스타그램 DM 보내기",
+    e:{name:"이름을 적어 주세요.", date:"방문 날짜를 골라 주세요.", past:"오늘 이후 날짜를 골라 주세요.", mon:"월요일은 휴무예요. 다른 날짜를 골라 주세요.", time:"방문 시간을 골라 주세요.",
+       party:"인원은 1~20명으로 적어 주세요.", contact:"연락처를 적어 주세요.", consent:"개인정보 수집에 동의해 주세요.", fail:"전송에 실패했어요. 잠시 뒤 다시 시도해 주세요.", many:"지금 신청이 몰리고 있어요. 잠시 뒤 다시 시도해 주세요."}
+  },
+  en: {
+    title:"Reservation Request", lead:"Request a table at ARZU Cheongdam.",
+    notice:"This is a request, not a confirmation. Our team will review it and contact you. No deposit is required. We are closed on Mondays.",
+    name:"Name", date:"Date", time:"Time", timePh:"Select a time", party:"Guests", partyHint:"For more than 20 guests, please message us on Instagram.",
+    contact:"How should we contact you?", contactHint:"Choose where you would like to receive our confirmation.",
+    types:{phone:"Phone", instagram:"Instagram", kakao:"KakaoTalk", wechat:"WeChat", line:"LINE", none:"Don't leave contact"},
+    ph:{phone:"Phone number", instagram:"@username", kakao:"KakaoTalk ID", wechat:"WeChat ID", line:"LINE ID"},
+    noneHint:"If you skip contact details, please send your reservation number to our Instagram DM after submitting.",
+    req:"Special requests", reqOpt:"(optional)",
+    consent:"I agree to share my name and contact details so the team can follow up on this reservation. They are used only for this purpose and deleted afterwards.",
+    go:"Send request", going:"Sending…",
+    done:"Your request has been received", doneBody:"Our team will review it and send a confirmation to the contact you left.",
+    doneNone:"You did not leave contact details. Please send the reservation number below to our Instagram DM.",
+    ig:"Message us on Instagram",
+    e:{name:"Please enter your name.", date:"Please choose a date.", past:"Please choose a date from today onward.", mon:"We are closed on Mondays. Please choose another date.", time:"Please choose a time.",
+       party:"Guests must be between 1 and 20.", contact:"Please enter your contact.", consent:"Please agree to the data collection.", fail:"Could not send. Please try again in a moment.", many:"We are getting many requests. Please try again shortly."}
+  },
+  zh: {
+    title:"预约申请", lead:"申请预订清潭 ARZU。",
+    notice:"提交申请不代表预约成功。团队确认后会与您联系。无需预付定金。周一休息。",
+    name:"姓名", date:"到店日期", time:"到店时间", timePh:"选择时间", party:"人数", partyHint:"超过20人请通过 Instagram 私信咨询。",
+    contact:"联系方式", contactHint:"请选择接收确认通知的联系方式。",
+    types:{phone:"电话", instagram:"Instagram", kakao:"KakaoTalk", wechat:"微信", line:"LINE", none:"不留联系方式"},
+    ph:{phone:"电话号码", instagram:"@账号", kakao:"KakaoTalk ID", wechat:"微信号", line:"LINE ID"},
+    noneHint:"如不留联系方式，提交后请将预约编号通过 Instagram 私信发给我们。",
+    req:"特殊要求", reqOpt:"（选填）",
+    consent:"我同意提供姓名和联系方式，用于预约确认。信息仅用于此目的，目的达成后将删除。",
+    go:"提交预约申请", going:"发送中…",
+    done:"已收到您的预约申请", doneBody:"团队确认后，会通过您留下的联系方式发送确认通知。",
+    doneNone:"您未留下联系方式。请将下方预约编号通过 Instagram 私信发给我们。",
+    ig:"发送 Instagram 私信",
+    e:{name:"请填写姓名。", date:"请选择日期。", past:"请选择今天及以后的日期。", mon:"周一休息，请选择其他日期。", time:"请选择时间。",
+       party:"人数请填写1至20人。", contact:"请填写联系方式。", consent:"请同意收集个人信息。", fail:"发送失败，请稍后再试。", many:"目前申请较多，请稍后再试。"}
+  },
+  ja: {
+    title:"予約リクエスト", lead:"清潭 ARZU のご予約をリクエストしてください。",
+    notice:"リクエストは予約確定ではありません。チームが確認してご連絡します。予約金は不要です。月曜日は定休日です。",
+    name:"お名前", date:"来店日", time:"来店時間", timePh:"時間を選択", party:"人数", partyHint:"20名を超える場合は Instagram の DM でご相談ください。",
+    contact:"ご連絡方法", contactHint:"確定のご案内を受け取る連絡先を選んでください。",
+    types:{phone:"電話番号", instagram:"Instagram", kakao:"カカオトーク", wechat:"WeChat", line:"LINE", none:"連絡先を残さない"},
+    ph:{phone:"電話番号", instagram:"@ユーザー名", kakao:"カカオトーク ID", wechat:"WeChat ID", line:"LINE ID"},
+    noneHint:"連絡先を残さない場合は、送信後に表示される予約番号を Instagram の DM でお送りください。",
+    req:"ご要望", reqOpt:"（任意）",
+    consent:"予約のご案内のために、お名前と連絡先を提供することに同意します。この目的のみに使用し、目的が終わったら削除されます。",
+    go:"予約をリクエスト", going:"送信中…",
+    done:"予約リクエストを受け付けました", doneBody:"チームが確認のうえ、ご記入の連絡先に確定のご案内をお送りします。",
+    doneNone:"連絡先が未記入です。下の予約番号を Instagram の DM でお送りください。",
+    ig:"Instagram で DM を送る",
+    e:{name:"お名前を入力してください。", date:"日付を選んでください。", past:"本日以降の日付を選んでください。", mon:"月曜日は定休日です。別の日を選んでください。", time:"時間を選んでください。",
+       party:"人数は1〜20名で入力してください。", contact:"連絡先を入力してください。", consent:"個人情報の収集に同意してください。", fail:"送信できませんでした。しばらくしてからもう一度お試しください。", many:"現在リクエストが集中しています。しばらくしてからお試しください。"}
+  }
+};
+
+var lang = "ko", ctype = "phone";
+var params = new URLSearchParams(location.search);
+var CHANNEL = (params.get("ref") || "").replace(/[^A-Za-z0-9_-]/g, "").slice(0, 20).toUpperCase();
+
+function $(id) { return document.getElementById(id); }
+function pad(n) { return (n < 10 ? "0" : "") + n; }
+function today() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+
+function buildTimes() {
+  var sel = $("time"), cur = sel.value, h, m, v, out = [];
+  var slots = [];
+  for (h = 11; h <= 23; h++) { slots.push(pad(h) + ":00"); slots.push(pad(h) + ":30"); }
+  slots.push("00:00", "00:30", "01:00", "01:30", "02:00");
+  sel.innerHTML = "";
+  var o = document.createElement("option"); o.value = ""; o.textContent = T[lang].timePh; sel.appendChild(o);
+  slots.forEach(function (s) { var op = document.createElement("option"); op.value = s; op.textContent = s; sel.appendChild(op); });
+  sel.value = cur;
+}
+
+function buildTypes() {
+  var box = $("ctypes"); box.innerHTML = "";
+  ["phone", "instagram", "kakao", "wechat", "line", "none"].forEach(function (k) {
+    var l = document.createElement("label"); l.className = "chip";
+    var i = document.createElement("input"); i.type = "radio"; i.name = "ctype"; i.value = k; i.checked = (k === ctype);
+    i.addEventListener("change", function () { ctype = k; syncContact(); });
+    var s = document.createElement("span"); s.textContent = T[lang].types[k];
+    l.appendChild(i); l.appendChild(s); box.appendChild(l);
+  });
+}
+
+function syncContact() {
+  var none = ctype === "none";
+  $("cvalWrap").hidden = none;
+  $("cval").placeholder = none ? "" : (T[lang].ph[ctype] || "");
+  $("cval").inputMode = ctype === "phone" ? "tel" : "text";
+  $("hContact").textContent = none ? T[lang].noneHint : T[lang].contactHint;
+}
+
+function applyLang() {
+  var t = T[lang];
+  document.documentElement.lang = lang;
+  $("tTitle").textContent = t.title; $("tLead").textContent = t.lead; $("tNotice").textContent = t.notice;
+  $("lName").textContent = t.name; $("lDate").textContent = t.date; $("lTime").textContent = t.time;
+  $("lParty").textContent = t.party; $("hParty").textContent = t.partyHint; $("lContact").textContent = t.contact;
+  $("lReq").innerHTML = ""; $("lReq").appendChild(document.createTextNode(t.req));
+  var o = document.createElement("span"); o.className = "opt"; o.textContent = t.reqOpt; $("lReq").appendChild(o);
+  $("tConsent").textContent = t.consent;
+  $("go").textContent = t.go;
+  buildTimes(); buildTypes(); syncContact();
+  Array.prototype.forEach.call(document.querySelectorAll(".lang-btn"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-lang") === lang ? "true" : "false"); });
+}
+
+function setLang(l, remember) {
+  lang = l;
+  if (remember) { try { localStorage.setItem("arzu_lang", l); } catch (e) {} }
+  applyLang();
+  if (!$("doneView").hidden) fillDone();
+}
+
+var lastCode = "", lastNone = false;
+function fillDone() {
+  var t = T[lang];
+  $("dTitle").textContent = t.done; $("dCode").textContent = lastCode;
+  $("dBody").textContent = lastNone ? t.doneNone : t.doneBody;
+  $("dBtn").textContent = t.ig; $("dBtn").hidden = !lastNone;
+  $("dDm").hidden = true;
+}
+
+function rpc(fn, args) {
+  return fetch(SB + "/rest/v1/rpc/" + fn, {
+    method: "POST",
+    headers: { "apikey": KEY, "Authorization": "Bearer " + KEY, "Content-Type": "application/json" },
+    body: JSON.stringify(args)
+  }).then(function (r) {
+    return r.text().then(function (txt) {
+      var j = null; try { j = JSON.parse(txt); } catch (e) { j = txt; }
+      if (!r.ok) { var m = (j && j.message) || String(txt); var er = new Error(m); throw er; }
+      return j;
+    });
+  });
+}
+
+$("f").addEventListener("submit", function (ev) {
+  ev.preventDefault();
+  var t = T[lang], e = t.e, err = $("err"); err.textContent = "";
+  var name = $("name").value.trim(), date = $("date").value, time = $("time").value;
+  var party = parseInt($("party").value, 10), cval = $("cval").value.trim();
+  if (!name) { err.textContent = e.name; $("name").focus(); return; }
+  if (!date) { err.textContent = e.date; $("date").focus(); return; }
+  if (date < today()) { err.textContent = e.past; $("date").focus(); return; }
+  var dp = date.split("-"); if (new Date(+dp[0], +dp[1] - 1, +dp[2]).getDay() === 1) { err.textContent = e.mon; $("date").focus(); return; }
+  if (!time) { err.textContent = e.time; $("time").focus(); return; }
+  if (!(party >= 1 && party <= 20)) { err.textContent = e.party; $("party").focus(); return; }
+  if (ctype !== "none" && cval.length < 2) { err.textContent = e.contact; $("cval").focus(); return; }
+  if (!$("consent").checked) { err.textContent = e.consent; $("consent").focus(); return; }
+  if ($("website").value) { lastCode = "------"; lastNone = false; showDone(); return; }
+  var btn = $("go"); btn.disabled = true; btn.textContent = t.going;
+  rpc("submit_reservation", {
+    p_name: name, p_contact_type: ctype, p_contact: ctype === "none" ? null : cval, p_party: party,
+    p_date: date, p_time: time, p_channel: CHANNEL || null, p_lang: lang, p_request: $("req").value.trim() || null, p_consent: true
+  }).then(function (code) {
+    lastCode = String(code); lastNone = (ctype === "none"); showDone();
+  }).catch(function (x) {
+    btn.disabled = false; btn.textContent = t.go;
+    err.textContent = /too_many/.test(x.message) ? e.many : e.fail;
+  });
+});
+
+function showDone() {
+  $("formView").hidden = true; $("doneView").hidden = false; fillDone(); window.scrollTo(0, 0);
+}
+
+(function init() {
+  var langsEl = $("langs");
+  LANGS.forEach(function (l) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "lang-btn"; b.setAttribute("data-lang", l[0]); b.textContent = l[1];
+    b.addEventListener("click", function () { setLang(l[0], true); }); langsEl.appendChild(b);
+  });
+  var saved = params.get("lang"); if (!T[saved]) { saved = null; try { saved = localStorage.getItem("arzu_lang"); } catch (e) {} }
+  if (T[saved]) lang = saved;
+  $("date").min = today();
+  applyLang();
+})();
+</script>
+</body>
+</html>
