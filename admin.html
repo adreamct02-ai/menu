@@ -95,6 +95,9 @@ main { max-width:960px; margin:0 auto; padding:14px 14px calc(40px + env(safe-ar
 .dh em { font-style:normal; color:var(--accent); margin-left:6px; }
 .rc { display:grid; grid-template-columns:54px 1fr auto; gap:10px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; cursor:pointer; }
 .rc.new { border-left:5px solid var(--accent); }
+.rc.dead { opacity:.6; }
+.rt.none { font-weight:500; font-size:12.5px; color:var(--muted); }
+.amt { font-weight:700; color:var(--ink); }
 .rt { text-align:center; font-weight:700; font-size:17px; font-variant-numeric:tabular-nums; line-height:1.2; }
 .rt small { display:block; font-weight:500; font-size:12px; color:var(--muted); }
 .rn { font-weight:700; font-size:17px; }
@@ -146,8 +149,11 @@ details summary { min-height:44px; display:flex; align-items:center; font-weight
 .sfields label { display:block; font-weight:700; font-size:13.5px; }
 .sfields input, .sfields textarea { display:block; width:100%; min-height:48px; margin-top:5px; padding:0 12px; font-size:16px; border:1px solid var(--line); border-radius:12px; background:#fff; -webkit-appearance:none; appearance:none; font-weight:400; }
 .sfields textarea { padding:10px 12px; min-height:72px; }
-.crow { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.crow { width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:#fff; }
 .crow small { color:var(--muted); display:block; }
+.chips.wrap { flex-wrap:wrap; overflow:visible; }
+.crow .go { flex:none; background:var(--ink); color:#fff; border-radius:10px; padding:9px 14px; font-weight:700; font-size:14px; }
+.crow .go.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
 .cacts { display:flex; flex-direction:column; gap:6px; flex:none; }
 .cacts .btn { min-height:40px; padding:0 12px; font-size:14px; }
 .altgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
@@ -209,7 +215,6 @@ details summary { min-height:44px; display:flex; align-items:center; font-weight
 
     <section id="listView" hidden>
       <div class="seg" id="fRangeSeg" role="group" aria-label="기간"></div>
-      <div class="chips" id="fChips" role="group" aria-label="상태"></div>
       <div class="chips" id="fStaff" role="group" aria-label="담당" hidden></div>
       <input type="search" id="fQ" placeholder="이름 · 연락처 · 담당 · 자리 검색" aria-label="검색">
       <div class="list" id="list"></div>
@@ -218,11 +223,11 @@ details summary { min-height:44px; display:flex; align-items:center; font-weight
 
     <section id="perfView" hidden>
       <div class="tiles" id="perfTiles"></div>
-      <h2 class="sec">채널별</h2>
-      <div class="scroll"><table id="perfTable"></table></div>
       <h2 class="sec">담당별</h2>
       <div class="scroll"><table id="staffTable"></table></div>
-      <p class="note">방문 = 상태가 '방문'인 예약. 방문율 = 방문 ÷ 신청. 매출과 재방문은 예약을 눌러 직접 입력한 값이에요.</p>
+      <h2 class="sec">유입 채널별 (예약 링크로 들어온 경우)</h2>
+      <div class="scroll"><table id="perfTable"></table></div>
+      <p class="note">금액은 예약이나 좌석을 눌러 직접 입력한 값이에요.</p>
     </section>
   </main>
 
@@ -231,40 +236,25 @@ details summary { min-height:44px; display:flex; align-items:center; font-weight
 
 <dialog id="dlg">
   <form method="dialog" class="dlg" id="editForm">
-    <div class="dh2"><h2 id="dTitle">예약</h2><button type="button" class="icon" id="eCancel" aria-label="닫기">✕</button></div>
+    <div class="dh2"><h2 id="dTitle">새 예약</h2><button type="button" class="icon" id="eCancel" aria-label="닫기">✕</button></div>
     <details id="pasteBox"><summary style="cursor:pointer;font-weight:700;font-size:13px">팀 예약 양식 붙여넣어 채우기</summary>
-      <textarea id="pasteTxt" style="margin-top:8px;min-height:120px" placeholder="1. 날짜 / 시간 : 11.20 금 / 21:00&#10;2. 예약명 / 담당 : 김동희ㆍ라온우진&#10;3. 인원 : 6&#10;4. 테이블 넘버 : B1&#10;5. 금액(바틀X) : &#10;6. 특이사항 :"></textarea>
+      <textarea id="pasteTxt" style="margin-top:8px;min-height:120px" placeholder="1. 날짜 / 시간 : 11.20 금 / &#10;2. 예약명 / 담당 : 김동희ㆍ라온우진&#10;3. 인원 : 6&#10;4. 테이블 넘버 : B1&#10;5. 금액(바틀X) : &#10;6. 특이사항 :"></textarea>
       <button type="button" class="btn ghost" id="pasteGo" style="margin-top:8px">양식대로 채우기</button>
     </details>
-    <div class="g2">
-      <div><label for="eName">이름</label><input type="text" id="eName" maxlength="60"></div>
-      <div><label for="eStatus">상태</label><select id="eStatus"></select></div>
-    </div>
-    <div class="g2">
-      <div><label for="eDate">방문 날짜</label><input type="date" id="eDate"></div>
-      <div><label for="eTime">방문 시간</label><input type="text" id="eTime" list="times" placeholder="21:00" maxlength="10"></div>
-    </div>
-    <datalist id="times"></datalist>
-    <datalist id="staffs"></datalist>
+    <div><label for="eName">이름</label><input type="text" id="eName" maxlength="60"></div>
     <div class="g2">
       <div><label for="eParty">인원</label><input type="number" id="eParty" min="1" max="100" inputmode="numeric"></div>
-      <div><label for="eSeat">좌석</label><input type="text" id="eSeat" maxlength="40" placeholder="예: B1"></div>
+      <div><label for="eSales">금액(원)</label><input type="number" id="eSales" min="0" inputmode="numeric"></div>
     </div>
     <div class="g2">
-      <div><label for="eCtype">연락 종류</label><select id="eCtype"></select></div>
-      <div><label for="eContact">연락처</label><input type="text" id="eContact" maxlength="80"></div>
+      <div><label for="eDate">날짜</label><input type="date" id="eDate"></div>
+      <div><label for="eSeat">좌석</label><input type="text" id="eSeat" maxlength="40" placeholder="예: B1 (몰라도 돼요)"></div>
     </div>
-    <div class="g2">
-      <div><label for="eStaff">담당</label><input type="text" id="eStaff" maxlength="40" list="staffs" placeholder="예: 라온우진"></div>
-      <div><label for="eChannel">유입 채널</label><select id="eChannel"></select></div>
-    </div>
-    <div><label for="eReq">손님 요청사항</label><textarea id="eReq" maxlength="500"></textarea></div>
-    <div class="g2">
-      <div><label for="eSales">매출(원)</label><input type="number" id="eSales" min="0" inputmode="numeric"></div>
-      <div><label for="eRevisit">재방문 횟수</label><input type="number" id="eRevisit" min="0" inputmode="numeric" value="0"></div>
-    </div>
+    <datalist id="staffs"></datalist>
+    <div><label for="eStaff">담당</label><input type="text" id="eStaff" maxlength="40" list="staffs" placeholder="예: 균"></div>
+    <div id="eStatusBox"><label for="eStatus">상태</label><select id="eStatus"></select></div>
+    <div><label for="eReq">특이사항</label><textarea id="eReq" maxlength="500"></textarea></div>
     <div><label for="eOrders">주문 내용</label><textarea id="eOrders" maxlength="1000" placeholder="나중에 주문받은 뒤 적어도 돼요"></textarea></div>
-    <div><label for="eMemo">팀 메모</label><textarea id="eMemo" maxlength="1000"></textarea></div>
     <p class="err" id="eErr" role="alert"></p>
     <div class="dlg-acts"><button type="button" class="btn danger" id="eDel">삭제</button><button type="submit" class="btn big" id="eSave">저장</button></div>
   </form>
@@ -280,7 +270,15 @@ details summary { min-height:44px; display:flex; align-items:center; font-weight
 var SB = "https://txdoqsktqlgrngqxavqu.supabase.co";
 var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4ZG9xc2t0cWxncm5ncXhhdnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzE4NTAsImV4cCI6MjExMDc0Nzg1MH0.GWwbAqVX6QliEIlQMb2TWEgqxe43lOUVsfHEhJgUVZ4";
 
-var STATUS = [["requested","접수"],["confirmed","확정"],["visited","방문"],["cancelled","취소"],["noshow","노쇼"],["rejected","거절"]];
+var STATUS = [["requested","신규"],["confirmed","예약"],["visited","방문"],["cancelled","취소"],["noshow","노쇼"],["rejected","취소"]];
+var STATUS4 = [["confirmed","예약"],["visited","방문"],["noshow","노쇼"],["cancelled","취소"]];
+function normSt(v) { return v === "rejected" ? "cancelled" : v; }
+function statusOpts(sel, cur) {
+  sel.innerHTML = "";
+  (cur === "requested" ? [["requested","신규"]] : []).concat(STATUS4).forEach(function (a) { var o = document.createElement("option"); o.value = a[0]; o.textContent = a[1]; sel.appendChild(o); });
+  sel.value = normSt(cur);
+}
+function tomorrowStr() { var p = todayStr().split("-"), d = new Date(+p[0], +p[1] - 1, +p[2] + 1); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
 var CTYPE = [["phone","전화번호"],["instagram","인스타그램"],["kakao","카카오톡"],["wechat","WeChat"],["line","LINE"],["none","연락처 없음"]];
 var CHANNELS = [["GH01","게스트하우스"],["CN01","중국 SNS"],["JP01","일본 SNS"],["CM01","커뮤니티"],["TA01","여행사"],["IN01","인플루언서"],["DIRECT","직접·전화"],["ETC","기타"]];
 var SRC = { web:"사이트", manual:"직접 입력" };
@@ -355,57 +353,47 @@ function fillSelect(sel, list, firstLabel) {
   list.forEach(function (it) { var op = document.createElement("option"); op.value = it[0]; op.textContent = it[1]; sel.appendChild(op); });
   sel.value = cur;
 }
-fillSelect($("eStatus"), STATUS);
-fillSelect($("eCtype"), CTYPE);
-fillSelect($("eChannel"), CHANNELS, "채널 없음");
-(function () { var dl = $("times"), h, m; for (h = 11; h <= 23; h++) for (m = 0; m < 60; m += 30) { var o = document.createElement("option"); o.value = pad(h) + ":" + pad(m); dl.appendChild(o); }
-  ["00:00","00:30","01:00","01:30","02:00","02:30","03:00"].forEach(function (v) { var o = document.createElement("option"); o.value = v; dl.appendChild(o); }); })();
 
-var fRange = "upcoming", fStatus = "", fStaff = "";
+var fRange = "today", fStaff = "", staffInit = false;
 function lastStaff() { try { return localStorage.getItem("arzu_staff") || ""; } catch (e) { return ""; } }
 function saveStaff(v) { try { localStorage.setItem("arzu_staff", v); } catch (e) {} }
 function staffNames() { var o = {}; rows.forEach(function (x) { if (x.staff) o[x.staff] = (o[x.staff] || 0) + 1; }); return Object.keys(o).sort(function (a, b) { return o[b] - o[a]; }); }
 function buildStaffUi() {
   var names = staffNames(), dl = $("staffs"); dl.innerHTML = "";
   names.forEach(function (n) { var o = document.createElement("option"); o.value = n; dl.appendChild(o); });
+  if (!staffInit && rows.length) { staffInit = true; var ls = lastStaff(); if (ls && names.indexOf(ls) >= 0) fStaff = ls; }
   var box = $("fStaff"); box.innerHTML = ""; box.hidden = !names.length; if (!names.length) { fStaff = ""; return; }
-  var list = [["", "담당 전체"]].concat(names.map(function (n) { return [n, n]; })).concat([["_none", "담당 없음"]]);
+  var list = [["", "전체"]].concat(names.map(function (n) { return [n, n]; }));
+  if (rows.some(function (x) { return !x.staff; })) list.push(["_none", "담당 없음"]);
   list.forEach(function (it) {
     var b = el("button", null, it[1]); b.type = "button"; b.setAttribute("aria-pressed", it[0] === fStaff ? "true" : "false");
-    b.addEventListener("click", function () { fStaff = it[0]; render(); }); box.appendChild(b);
+    b.addEventListener("click", function () { fStaff = it[0]; if (fStaff && fStaff !== "_none") saveStaff(fStaff); render(); }); box.appendChild(b);
   });
 }
-var RANGES = [["today","오늘"],["upcoming","앞으로"],["past","지난"],["all","전체"]];
-var SCHIPS = [["","전체"],["requested","접수"],["confirmed","확정"],["visited","방문"],["closed","취소·노쇼"]];
+var RANGES = [["today","오늘"],["future","미래"],["past","과거"]];
 function buildFilters() {
-  function mk(box, list, cur, set) {
-    box.innerHTML = "";
-    list.forEach(function (it) {
-      var b = el("button", null, it[1]); b.type = "button"; b.setAttribute("aria-pressed", it[0] === cur ? "true" : "false");
-      b.addEventListener("click", function () { set(it[0]); buildFilters(); render(); });
-      box.appendChild(b);
-    });
-  }
-  mk($("fRangeSeg"), RANGES, fRange, function (v) { fRange = v; });
-  mk($("fChips"), SCHIPS, fStatus, function (v) { fStatus = v; });
+  var box = $("fRangeSeg"); box.innerHTML = "";
+  RANGES.forEach(function (it) {
+    var b = el("button", null, it[1]); b.type = "button"; b.setAttribute("aria-pressed", it[0] === fRange ? "true" : "false");
+    b.addEventListener("click", function () { fRange = it[0]; buildFilters(); render(); }); box.appendChild(b);
+  });
 }
 buildFilters();
 $("fQ").addEventListener("input", render);
 
 function filtered() {
-  var t = todayStr(), r = fRange, s = fStatus, q = $("fQ").value.trim().toLowerCase();
+  var t = todayStr(), t1 = tomorrowStr(), r = fRange, q = $("fQ").value.trim().toLowerCase();
   return rows.filter(function (x) {
-    if (r === "upcoming" && x.visit_date < t) return false;
-    if (r === "today" && x.visit_date !== t) return false;
+    if (r === "today" && x.visit_date !== t && x.visit_date !== t1) return false;
+    if (r === "future" && x.visit_date <= t1) return false;
     if (r === "past" && x.visit_date >= t) return false;
-    if (s === "closed" ? !(x.status === "cancelled" || x.status === "noshow" || x.status === "rejected") : (s && x.status !== s)) return false;
     if (fStaff === "_none" ? !!x.staff : (fStaff && x.staff !== fStaff)) return false;
     if (q && (x.name + " " + (x.contact || "") + " " + x.code + " " + (x.seat || "") + " " + (x.staff || "")).toLowerCase().indexOf(q) < 0) return false;
     return true;
   }).sort(function (a, b) {
-    var past = fRange === "past" || fRange === "all";
+    var past = fRange === "past";
     var ka = a.visit_date + " " + (a.visit_time || ""), kb = b.visit_date + " " + (b.visit_time || "");
-    return past ? (ka < kb ? 1 : -1) : (ka < kb ? -1 : 1);
+    return past ? (ka < kb ? 1 : -1) : (ka < kb ? -1 : (ka > kb ? 1 : (a.created_at < b.created_at ? -1 : 1)));
   });
 }
 
@@ -424,7 +412,7 @@ function whenText(x) {
 
 function dayHead(date) {
   var p = date.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]), h = el("div", "dh", (+p[1]) + "/" + (+p[2]) + " (" + DAYS[d.getDay()] + ")");
-  var t = todayStr(); if (date === t) h.appendChild(el("em", null, "오늘"));
+  if (date === todayStr()) h.appendChild(el("em", null, "오늘")); else if (date === tomorrowStr()) h.appendChild(el("em", null, "내일"));
   return h;
 }
 function renderList() {
@@ -434,22 +422,20 @@ function renderList() {
   var last = null;
   data.forEach(function (x) {
     if (x.visit_date !== last) { box.appendChild(dayHead(x.visit_date)); last = x.visit_date; }
-    var c = el("div", "rc" + (x.status === "requested" ? " new" : "")); c.tabIndex = 0; c.setAttribute("role", "button");
-    c.appendChild(el("div", "rt", x.visit_time || "시간 미정"));
+    var dead = x.status === "cancelled" || x.status === "noshow" || x.status === "rejected";
+    var c = el("div", "rc" + (x.status === "requested" ? " new" : "") + (dead ? " dead" : "")); c.tabIndex = 0; c.setAttribute("role", "button");
+    var seats = seatList(x); c.appendChild(el("div", "rt" + (seats.length ? "" : " none"), seats.length ? seats.join(", ") : "자리 미정"));
     var mid = el("div"), nm = el("div", "rn", x.name); nm.appendChild(el("span", "rp", x.party_size + "명")); mid.appendChild(nm);
     var rs = el("div", "rs");
-    if (x.seat) rs.appendChild(el("span", "chip-seat", x.seat));
     if (x.staff) rs.appendChild(el("span", null, "담당 " + x.staff));
-    rs.appendChild(el("span", null, x.contact_type === "none" || !x.contact ? "연락처 없음" : labelOf(CTYPE, x.contact_type) + " " + x.contact));
-    if (x.sales_amount) rs.appendChild(el("span", null, "매출 " + won(x.sales_amount) + "원"));
-    if (x.revisit_count) rs.appendChild(el("span", null, "재방문 " + x.revisit_count + "회"));
+    rs.appendChild(el("b", "amt", x.sales_amount ? won(x.sales_amount) + "원" : "금액 미입력"));
+    if (x.contact && x.contact_type !== "none") rs.appendChild(el("span", null, labelOf(CTYPE, x.contact_type) + " " + x.contact));
     mid.appendChild(rs);
-    if (x.request) mid.appendChild(el("div", "rq", "요청: " + x.request));
+    if (x.request) mid.appendChild(el("div", "rq", "특이사항: " + x.request));
     if (x.orders) mid.appendChild(el("div", "rq", "주문: " + x.orders));
     c.appendChild(mid);
-    var sel = document.createElement("select"); sel.className = "stsel st-" + x.status; sel.setAttribute("aria-label", "상태 바꾸기");
-    STATUS.forEach(function (s) { var o = document.createElement("option"); o.value = s[0]; o.textContent = s[1]; sel.appendChild(o); });
-    sel.value = x.status;
+    var sel = document.createElement("select"); sel.className = "stsel st-" + normSt(x.status); sel.setAttribute("aria-label", "상태 바꾸기");
+    statusOpts(sel, x.status);
     sel.addEventListener("click", function (ev) { ev.stopPropagation(); });
     sel.addEventListener("change", function () { quickStatus(x, sel.value, sel); });
     c.appendChild(sel);
@@ -473,55 +459,29 @@ function quickStatus(x, st, sel) {
   }).catch(function (e) { sel.value = prev; sel.disabled = false; if (!authFail(e)) toast("저장하지 못했어요."); });
 }
 
-function renderPerf() {
-  var t = $("perfTable"); t.innerHTML = "";
-  var keys = CHANNELS.map(function (c) { return c[0]; }).concat(["_none"]);
-  var agg = {}; keys.forEach(function (k) { agg[k] = { n:0, conf:0, vis:0, bad:0, sales:0, rev:0 }; });
-  rows.forEach(function (x) {
-    var k = x.channel && agg[x.channel] ? x.channel : "_none", a = agg[k]; a.n++;
-    if (x.status === "confirmed" || x.status === "visited") a.conf++;
-    if (x.status === "visited") a.vis++;
-    if (x.status === "cancelled" || x.status === "noshow" || x.status === "rejected") a.bad++;
-    a.sales += x.sales_amount || 0; a.rev += x.revisit_count || 0;
-  });
-  var head = el("thead"), hr = el("tr");
-  ["채널","신청","확정","방문","취소·노쇼","방문율","매출(원)","재방문"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
-  head.appendChild(hr); t.appendChild(head);
-  var body = el("tbody"), tot = { n:0, conf:0, vis:0, bad:0, sales:0, rev:0 };
-  keys.forEach(function (k) {
-    var a = agg[k]; if (!a.n) return;
-    var tr = el("tr"); tr.appendChild(el("td", null, k === "_none" ? "채널 없음" : k + " " + labelOf(CHANNELS, k)));
-    [a.n, a.conf, a.vis, a.bad, Math.round(a.vis / a.n * 100) + "%", won(a.sales), a.rev].forEach(function (v) { tr.appendChild(el("td", null, String(v))); });
-    body.appendChild(tr); for (var f in tot) tot[f] += a[f];
-  });
-  if (!body.children.length) { var er = el("tr"), ed = el("td", "empty", "아직 예약이 없어요."); ed.colSpan = 8; ed.style.textAlign = "center"; er.appendChild(ed); body.appendChild(er); }
+function tally(list) { var a = { n: 0, vis: 0, bad: 0, sales: 0 }; list.forEach(function (x) { a.n++; if (x.status === "visited") a.vis++; if (x.status === "cancelled" || x.status === "noshow" || x.status === "rejected") a.bad++; a.sales += x.sales_amount || 0; }); return a; }
+function fillTable(t, firstHead, groups, total) {
+  t.innerHTML = "";
+  var head = el("thead"), hr = el("tr"); [firstHead, "예약", "방문", "노쇼·취소", "금액(원)"].forEach(function (h) { hr.appendChild(el("th", null, h)); }); head.appendChild(hr); t.appendChild(head);
+  var body = el("tbody");
+  groups.forEach(function (g) { var a = g[1], tr = el("tr"); tr.appendChild(el("td", null, g[0])); [a.n, a.vis, a.bad, won(a.sales)].forEach(function (v) { tr.appendChild(el("td", null, String(v))); }); body.appendChild(tr); });
+  if (!groups.length) { var er = el("tr"), ed = el("td", "empty", "아직 예약이 없어요."); ed.colSpan = 5; ed.style.textAlign = "center"; er.appendChild(ed); body.appendChild(er); }
   t.appendChild(body);
-  if (tot.n) {
-    var foot = el("tfoot"), fr = el("tr"); fr.appendChild(el("td", null, "합계"));
-    [tot.n, tot.conf, tot.vis, tot.bad, Math.round(tot.vis / tot.n * 100) + "%", won(tot.sales), tot.rev].forEach(function (v) { fr.appendChild(el("td", null, String(v))); });
-    foot.appendChild(fr); t.appendChild(foot);
-  }
+  if (groups.length > 1) { var foot = el("tfoot"), fr = el("tr"); fr.appendChild(el("td", null, "합계")); [total.n, total.vis, total.bad, won(total.sales)].forEach(function (v) { fr.appendChild(el("td", null, String(v))); }); foot.appendChild(fr); t.appendChild(foot); }
 }
-
+function renderPerf() {
+  var by = {}, keys = []; rows.forEach(function (x) { var k = x.channel ? x.channel + " " + labelOf(CHANNELS, x.channel) : "채널 없음"; if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(x); });
+  fillTable($("perfTable"), "유입 채널", keys.map(function (k) { return [k, tally(by[k])]; }).sort(function (a, b) { return b[1].n - a[1].n; }), tally(rows));
+}
 function renderTiles() {
-  var box = $("perfTiles"); box.innerHTML = "";
-  var n = rows.length, vis = rows.filter(function (x) { return x.status === "visited"; }).length;
-  var sales = rows.reduce(function (a, x) { return a + (x.sales_amount || 0); }, 0), rev = rows.reduce(function (a, x) { return a + (x.revisit_count || 0); }, 0);
-  [[n, "전체 신청"], [vis, "방문 완료"], [won(sales) + "원", "누적 매출"], [rev, "재방문 합계"]].forEach(function (a) {
-    var t = el("div", "tile"); t.appendChild(el("b", null, String(a[0]))); t.appendChild(el("span", null, a[1])); box.appendChild(t);
+  var box = $("perfTiles"); box.innerHTML = ""; var a = tally(rows);
+  [[a.n, "전체 예약"], [a.vis, "방문"], [a.bad, "노쇼·취소"], [won(a.sales) + "원", "금액 합계"]].forEach(function (v) {
+    var t = el("div", "tile"); t.appendChild(el("b", null, String(v[0]))); t.appendChild(el("span", null, v[1])); box.appendChild(t);
   });
 }
 function renderStaff() {
-  var t = $("staffTable"); t.innerHTML = ""; var agg = {}, names = [];
-  rows.forEach(function (x) {
-    var k = x.staff || "(담당 없음)"; if (!agg[k]) { agg[k] = { n:0, vis:0, sales:0, rev:0 }; names.push(k); }
-    var a = agg[k]; a.n++; if (x.status === "visited") a.vis++; a.sales += x.sales_amount || 0; a.rev += x.revisit_count || 0;
-  });
-  var head = el("thead"), hr = el("tr"); ["담당","신청","방문","매출(원)","재방문"].forEach(function (h) { hr.appendChild(el("th", null, h)); }); head.appendChild(hr); t.appendChild(head);
-  var body = el("tbody"); names.sort(function (a, b) { return agg[b].vis - agg[a].vis || agg[b].n - agg[a].n; });
-  names.forEach(function (k) { var a = agg[k], tr = el("tr"); tr.appendChild(el("td", null, k)); [a.n, a.vis, won(a.sales), a.rev].forEach(function (v) { tr.appendChild(el("td", null, String(v))); }); body.appendChild(tr); });
-  if (!names.length) { var er = el("tr"), ed = el("td", "empty", "아직 예약이 없어요."); ed.colSpan = 5; er.appendChild(ed); body.appendChild(er); }
-  t.appendChild(body);
+  var by = {}, keys = []; rows.forEach(function (x) { var k = x.staff || "(담당 없음)"; if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(x); });
+  fillTable($("staffTable"), "담당", keys.map(function (k) { return [k, tally(by[k])]; }).sort(function (a, b) { return b[1].vis - a[1].vis || b[1].n - a[1].n; }), tally(rows));
 }
 
 /* ---------- paste form ---------- */
@@ -552,7 +512,7 @@ function parseForm(txt) {
 }
 $("pasteGo").addEventListener("click", function () {
   var r = parseForm($("pasteTxt").value), got = 0;
-  if (r.date) { $("eDate").value = r.date; got++; } if (r.time) { $("eTime").value = r.time; got++; }
+  if (r.date) { $("eDate").value = r.date; got++; }
   if (r.name) { $("eName").value = r.name; got++; } if (r.staff) { $("eStaff").value = r.staff; got++; }
   if (r.party) { $("eParty").value = r.party; got++; } if (r.seat) { $("eSeat").value = r.seat; got++; }
   if (r.sales != null) { $("eSales").value = r.sales; got++; } if (r.request) { $("eReq").value = r.request; got++; }
@@ -573,15 +533,16 @@ $("tabPerf").addEventListener("click", function () { setTab("perf"); load(true);
 /* ---------- edit dialog ---------- */
 function openEdit(x) {
   editing = x || null; $("eErr").textContent = "";
-  $("dTitle").textContent = x ? "예약 수정 #" + x.code : "새 예약 직접 입력";
-  $("eName").value = x ? x.name : ""; $("eStatus").value = x ? x.status : "confirmed";
-  $("eDate").value = x ? x.visit_date : todayStr(); $("eTime").value = x ? (x.visit_time || "") : "";
+  $("dTitle").textContent = x ? "예약 수정" : "새 예약";
+  $("eName").value = x ? x.name : "";
+  $("eDate").value = x ? x.visit_date : todayStr();
   $("eParty").value = x ? x.party_size : 2; $("eSeat").value = x ? (x.seat || "") : "";
-  $("eCtype").value = x ? x.contact_type : "phone"; $("eContact").value = x ? (x.contact || "") : "";
-  $("eChannel").value = x ? (x.channel || "") : ""; $("eReq").value = x ? (x.request || "") : "";
-  $("eSales").value = x && x.sales_amount != null ? x.sales_amount : ""; $("eRevisit").value = x ? (x.revisit_count || 0) : 0;
-  $("eMemo").value = x ? (x.memo || "") : ""; $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eOrders").value = x ? (x.orders || "") : ""; $("pasteTxt").value = ""; $("pasteBox").hidden = !!x; $("pasteBox").open = false;
-  $("eDel").hidden = !x; $("dlg").showModal();
+  $("eReq").value = x ? (x.request || "") : "";
+  $("eSales").value = x && x.sales_amount != null ? x.sales_amount : "";
+  $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eOrders").value = x ? (x.orders || "") : "";
+  statusOpts($("eStatus"), x ? x.status : "confirmed"); $("eStatusBox").hidden = !x;
+  $("pasteTxt").value = ""; $("pasteBox").hidden = !!x; $("pasteBox").open = false;
+  $("eDel").hidden = !x; $("dlg").showModal(); try { document.activeElement.blur(); } catch (e) {}
 }
 $("newBtn").addEventListener("click", function () { openEdit(null); });
 $("eCancel").addEventListener("click", function () { $("dlg").close(); });
@@ -591,10 +552,10 @@ $("editForm").addEventListener("submit", function (ev) {
   if (!name) { $("eErr").textContent = "이름을 적어 주세요."; return; }
   if (!date) { $("eErr").textContent = "날짜를 골라 주세요."; return; }
   if (!(party >= 1 && party <= 100)) { $("eErr").textContent = "인원은 1~100명으로 적어 주세요."; return; }
-  var p = { name: name, status: $("eStatus").value, contact_type: $("eCtype").value, contact: $("eContact").value.trim(), party_size: String(party),
-    visit_date: date, visit_time: $("eTime").value.trim(), seat: $("eSeat").value.trim(), channel: $("eChannel").value, request: $("eReq").value.trim(),
-    sales_amount: $("eSales").value, revisit_count: $("eRevisit").value || "0", memo: $("eMemo").value.trim(), staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim() };
-  if (editing) p.id = editing.id;
+  var over = { name: name, party_size: String(party), visit_date: date, seat: $("eSeat").value.trim(), request: $("eReq").value.trim(), sales_amount: $("eSales").value, staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim() };
+  var p;
+  if (editing) { over.status = $("eStatus").value; p = payloadOf(editing, over); }
+  else { p = { status: "confirmed", contact_type: "none", contact: "", visit_time: "", channel: "", revisit_count: "0", memo: "" }; for (var k in over) p[k] = over[k]; }
   var b = $("eSave"); b.disabled = true;
   if (p.staff) saveStaff(p.staff);
   rpc("admin_save", { p_token: token, p: p }).then(function () { $("dlg").close(); toast("저장했어요."); return load(true); })
@@ -645,7 +606,7 @@ function saveSeat(x, newSeat, status) {
   return rpc("admin_save", { p_token: token, p: payloadOf(x, over) }).then(function (row) { Object.keys(row).forEach(function (k) { x[k] = row[k]; }); buildMap(); render(); });
 }
 function untilText(x, date) {
-  if (!x.visit_time || !/^\d{1,2}:\d{2}/.test(x.visit_time)) return "시간 미정";
+  if (!x.visit_time || !/^\d{1,2}:\d{2}/.test(x.visit_time)) return "예약 손님";
   var p = date.split("-"), t = x.visit_time.split(":"), h = +t[0], m = +t[1];
   if (date !== todayStr()) return (+p[1]) + "/" + (+p[2]) + " " + x.visit_time + " 예약";
   var d = new Date(+p[0], +p[1] - 1, +p[2] + (h < 6 ? 1 : 0), h, m), diff = Math.round((d - new Date()) / 60000);
@@ -686,7 +647,7 @@ function openSeat(id, mode) {
       var f = el("div", "sfields");
       var l1 = el("label", null, "담당"), i1 = document.createElement("input"); i1.setAttribute("list", "staffs"); i1.maxLength = 40; i1.value = x.staff || ""; l1.appendChild(i1);
       var l2 = el("label", null, "주문 내용 (나중에 적어도 돼요)"), i2 = document.createElement("textarea"); i2.maxLength = 1000; i2.value = x.orders || ""; l2.appendChild(i2);
-      var l3 = el("label", null, "매출(원)"), i3 = document.createElement("input"); i3.type = "number"; i3.min = 0; i3.inputMode = "numeric"; i3.value = x.sales_amount == null ? "" : x.sales_amount; l3.appendChild(i3);
+      var l3 = el("label", null, "금액(원)"), i3 = document.createElement("input"); i3.type = "number"; i3.min = 0; i3.inputMode = "numeric"; i3.value = x.sales_amount == null ? "" : x.sales_amount; l3.appendChild(i3);
       f.appendChild(l1); f.appendChild(l2); f.appendChild(l3); c.appendChild(f);
       var bar = el("div", "res-bot");
       var sv = el("button", "btn", "저장"); sv.type = "button";
@@ -719,43 +680,62 @@ function openSeat(id, mode) {
     body.appendChild(err); close(); showSeat(); return;
   }
 
-  if (resv.length) body.appendChild(el("p", "note", "※ " + resv.map(function (x) { return untilText(x, date) + " " + x.name; }).join(", ") + " 예약석이에요."));
-  body.appendChild(el("h3", "sub", "예약한 손님"));
-  var cands = rows.filter(function (x) { return x.visit_date === date && LIVE[x.status] && resv.indexOf(x) < 0; })
-    .sort(function (a, b) { return (seatList(a).length ? 1 : 0) - (seatList(b).length ? 1 : 0) || (a.visit_time || "").localeCompare(b.visit_time || ""); });
-  var box = el("div", "cand");
-  if (!cands.length) box.appendChild(el("p", "note", "이 날짜에 예약한 손님이 없어요."));
-  cands.forEach(function (x) {
-    var r = el("div", "crow"), t = el("div");
-    t.appendChild(el("b", null, x.name + " · " + x.party_size + "명"));
-    t.appendChild(el("small", null, (x.visit_time || "시간 미정") + " · " + labelOf(STATUS, x.status) + (x.staff ? " · 담당 " + x.staff : "") + (seatList(x).length ? " · 현재 " + x.seat : "")));
-    r.appendChild(t);
-    var acts = el("div", "cacts");
-    var now = el("button", "btn", x.status === "visited" ? "이 자리도" : "지금 앉히기"); now.type = "button";
-    now.addEventListener("click", function () { var cur = seatList(x); cur.push(id); saveSeat(x, cur.join(", "), x.status === "visited" ? null : "visited").then(function () { done(id + "에 " + x.name + " 님을 앉혔어요."); }).catch(fail); });
-    acts.appendChild(now);
-    if (x.status !== "visited") { var rs = el("button", "btn ghost", "예약석으로"); rs.type = "button"; rs.addEventListener("click", function () { var cur = seatList(x); cur.push(id); saveSeat(x, cur.join(", "), null).then(function () { done(id + "을 " + x.name + " 님 예약석으로 잡았어요."); }).catch(fail); }); acts.appendChild(rs); }
-    r.appendChild(acts); box.appendChild(r);
-  });
-  body.appendChild(box);
-  body.appendChild(el("h3", "sub", "예약 없이 온 손님"));
-  var w = el("div", "sfields");
-  function fld(label, node) { var l = el("label", null, label); l.appendChild(node); w.appendChild(l); return node; }
-  var n1 = document.createElement("input"); n1.maxLength = 60; n1.placeholder = "비워두면 '현장 손님'"; fld("이름", n1);
-  var g2 = el("div", "g2"); w.appendChild(g2);
-  var n2 = document.createElement("input"); n2.type = "number"; n2.min = 1; n2.max = 100; n2.value = 2; n2.inputMode = "numeric";
-  var n3 = document.createElement("input"); n3.setAttribute("list", "staffs"); n3.maxLength = 40; n3.value = lastStaff(); n3.placeholder = "예: 라온우진";
-  var la = el("label", null, "인원"); la.appendChild(n2); g2.appendChild(la); var lb = el("label", null, "담당"); lb.appendChild(n3); g2.appendChild(lb);
-  var n4 = document.createElement("textarea"); n4.maxLength = 1000; n4.placeholder = "주문은 나중에 적어도 돼요"; fld("주문 내용", n4);
-  body.appendChild(w);
-  var go = el("button", "btn", "바로 앉히기"); go.type = "button";
-  go.addEventListener("click", function () {
-    var pn = parseInt(n2.value, 10); if (!(pn >= 1 && pn <= 100)) { err.textContent = "인원을 확인해 주세요."; return; }
-    var d = new Date(), tm = pad(d.getHours()) + ":" + pad(d.getMinutes()); if (n3.value.trim()) saveStaff(n3.value.trim());
-    rpc("admin_save", { p_token: token, p: { name: n1.value.trim() || "현장 손님", status: "visited", contact_type: "none", contact: "", party_size: String(pn), visit_date: date, visit_time: tm, seat: id, channel: "DIRECT", request: "", sales_amount: "", revisit_count: "0", memo: "", staff: n3.value.trim(), orders: n4.value.trim() } })
-      .then(function () { done(id + "에 앉혔어요."); return load(true); }).catch(fail);
-  });
-  body.appendChild(go); body.appendChild(err); close(); showSeat();
+  if (resv.length) body.appendChild(el("p", "note", "※ " + resv.map(function (x) { return x.name + " 님 예약석"; }).join(", ") + "인 자리예요."));
+  body.appendChild(el("h3", "sub", "누구를 앉힐까요? 담당 이름을 눌러 주세요"));
+  var pool = rows.filter(function (x) { return x.visit_date === date && LIVE[x.status] && resv.indexOf(x) < 0; });
+  var waiting = pool.filter(function (x) { return x.status !== "visited"; }), sitting = pool.filter(function (x) { return x.status === "visited"; });
+  var cnt = {}, names = [];
+  waiting.forEach(function (x) { var k = x.staff || "_none"; if (!cnt[k]) { cnt[k] = 0; if (k !== "_none") names.push(k); } cnt[k]++; });
+  names.sort(function (a, b) { return cnt[b] - cnt[a]; });
+  var ls = lastStaff(), sel = names.indexOf(ls) >= 0 ? ls : (names.length === 1 && !cnt._none ? names[0] : (!names.length && !cnt._none ? "walk" : ""));
+  var chipBox = el("div", "chips wrap"), area = el("div", "sfields"); body.appendChild(chipBox); body.appendChild(area);
+  function seatNow(x, extra) {
+    var cur = extra ? seatList(x).concat([id]) : [id];
+    return saveSeat(x, cur.join(", "), x.status === "visited" ? null : "visited").then(function () { done(id + "에 " + x.name + " 님을 앉혔어요."); }).catch(fail);
+  }
+  function draw() {
+    chipBox.innerHTML = "";
+    var opts = names.map(function (n) { return [n, n + " (" + cnt[n] + ")"]; });
+    if (cnt._none) opts.push(["_none", "담당 없음 (" + cnt._none + ")"]);
+    opts.push(["walk", "예약 없이 온 손님"]);
+    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; if (sel !== "walk" && sel !== "_none") saveStaff(sel); draw(); }); chipBox.appendChild(b); });
+    area.innerHTML = ""; err.textContent = "";
+    if (!sel) { area.appendChild(el("p", "note", "위에서 내 이름을 누르면 내 예약 손님이 떠요.")); return; }
+    if (sel === "walk") {
+      function fld(label, node) { var l = el("label", null, label); l.appendChild(node); area.appendChild(l); return node; }
+      var n1 = document.createElement("input"); n1.maxLength = 60; n1.placeholder = "비워두면 '현장 손님'"; fld("이름", n1);
+      var g2 = el("div", "g2"); area.appendChild(g2);
+      var n2 = document.createElement("input"); n2.type = "number"; n2.min = 1; n2.max = 100; n2.value = 2; n2.inputMode = "numeric";
+      var n3 = document.createElement("input"); n3.setAttribute("list", "staffs"); n3.maxLength = 40; n3.value = lastStaff(); n3.placeholder = "예: 균";
+      var la = el("label", null, "인원"); la.appendChild(n2); g2.appendChild(la); var lb = el("label", null, "담당"); lb.appendChild(n3); g2.appendChild(lb);
+      var n4 = document.createElement("textarea"); n4.maxLength = 1000; n4.placeholder = "주문은 나중에 적어도 돼요"; fld("주문 내용", n4);
+      var go = el("button", "btn", "바로 앉히기"); go.type = "button";
+      go.addEventListener("click", function () {
+        var pn = parseInt(n2.value, 10); if (!(pn >= 1 && pn <= 100)) { err.textContent = "인원을 확인해 주세요."; return; }
+        var d = new Date(), tm = pad(d.getHours()) + ":" + pad(d.getMinutes()); if (n3.value.trim()) saveStaff(n3.value.trim());
+        rpc("admin_save", { p_token: token, p: { name: n1.value.trim() || "현장 손님", status: "visited", contact_type: "none", contact: "", party_size: String(pn), visit_date: date, visit_time: tm, seat: id, channel: "DIRECT", request: "", sales_amount: "", revisit_count: "0", memo: "", staff: n3.value.trim(), orders: n4.value.trim() } })
+          .then(function () { done(id + "에 앉혔어요."); return load(true); }).catch(fail);
+      });
+      area.appendChild(go); return;
+    }
+    var mine = waiting.filter(function (x) { return (x.staff || "_none") === sel; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+    var box = el("div", "cand");
+    mine.forEach(function (x) {
+      var r = el("button", "crow"); r.type = "button"; var t = el("div");
+      t.appendChild(el("b", null, x.name + " · " + x.party_size + "명"));
+      var sm = []; if (seatList(x).length) sm.push("현재 " + x.seat + " → 이 자리로 이동"); if (x.request) sm.push(x.request); t.appendChild(el("small", null, sm.join(" · ") || "탭하면 이 자리에 앉아요"));
+      r.appendChild(t); r.appendChild(el("span", "go", "앉히기"));
+      r.addEventListener("click", function () { seatNow(x, false); }); box.appendChild(r);
+    });
+    var sit = sitting.filter(function (x) { return (x.staff || "_none") === sel; });
+    area.appendChild(box);
+    if (!mine.length) box.appendChild(el("p", "note", "이 담당의 대기 중인 예약이 없어요."));
+    if (sit.length) {
+      area.appendChild(el("h3", "sub", "이미 앉은 손님 · 자리 추가"));
+      var b2 = el("div", "cand"); sit.forEach(function (x) { var r = el("button", "crow"); r.type = "button"; var t = el("div"); t.appendChild(el("b", null, x.name + " · " + x.party_size + "명")); t.appendChild(el("small", null, "현재 " + (x.seat || "-"))); r.appendChild(t); r.appendChild(el("span", "go ghost", "이 자리도")); r.addEventListener("click", function () { seatNow(x, true); }); b2.appendChild(r); }); area.appendChild(b2);
+    }
+  }
+  draw(); body.appendChild(err); close(); showSeat();
 }
 var Z = 1, ZL = [1, 1.8, 2.6, 3.5];
 function mapW() { return $("mapwrap").clientWidth * Z; }
@@ -804,14 +784,11 @@ $("mToday").addEventListener("click", function () { $("mDate").value = todayStr(
 
 /* ---------- csv ---------- */
 $("csvBtn").addEventListener("click", function () {
-  var head = ["예약번호","방문일","시간","이름","인원","상태","연락종류","연락처","좌석","채널","매출","재방문","요청사항","주문","메모","담당","경로","신청시각"];
+  var head = ["예약번호","날짜","이름","인원","상태","좌석","담당","금액","특이사항","주문","경로"];
   function q(v) { v = v == null ? "" : String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
   var lines = [head.map(q).join(",")];
-  filtered().forEach(function (x) {
-    lines.push([x.code, x.visit_date, x.visit_time, x.name, x.party_size, labelOf(STATUS, x.status), labelOf(CTYPE, x.contact_type), x.contact, x.seat, x.channel,
-      x.sales_amount, x.revisit_count, x.request, x.orders, x.memo, x.staff, SRC[x.source], x.created_at].map(q).join(","));
-  });
-  var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+  filtered().forEach(function (x) { lines.push([x.code, x.visit_date, x.name, x.party_size, labelOf(STATUS, x.status), x.seat, x.staff, x.sales_amount, x.request, x.orders, SRC[x.source]].map(q).join(",")); });
+  var blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
   var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "arzu-reservations-" + todayStr() + ".csv";
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
 });
