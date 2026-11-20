@@ -833,8 +833,8 @@ function openSeat(id, mode, noSync, notice) {
     }
     if (!mine.length) box.appendChild(el("p", "note", "이 담당의 대기 중인 예약이 없어요."));
     if (sit.length) {
-      area.appendChild(el("h3", "sub", "이미 앉은 손님 · 자리 추가"));
-      var b2 = el("div", "cand"); sit.forEach(function (x) { var r = el("button", "crow"); r.type = "button"; var t = el("div"); t.appendChild(el("b", null, x.name + " · " + x.party_size + "명")); t.appendChild(el("small", null, "현재 " + (x.seat || "-"))); r.appendChild(t); r.appendChild(el("span", "go ghost", "이 자리도")); r.addEventListener("click", function () { seatNow(x, true); }); b2.appendChild(r); }); area.appendChild(b2);
+      area.appendChild(el("h3", "sub", "이미 앉은 손님 · 좌석 추가"));
+      var b2 = el("div", "cand"); sit.forEach(function (x) { var r = el("button", "crow"); r.type = "button"; var t = el("div"); t.appendChild(el("b", null, x.name + " · " + x.party_size + "명")); t.appendChild(el("small", null, "현재 " + (x.seat || "-"))); r.appendChild(t); r.appendChild(el("span", "go ghost", "좌석 추가")); r.addEventListener("click", function () { seatNow(x, true); }); b2.appendChild(r); }); area.appendChild(b2);
     }
   }
   draw(); body.appendChild(err); close(); showSeat();
