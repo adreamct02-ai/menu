@@ -113,6 +113,7 @@ main { max-width:960px; margin:0 auto; padding:14px 14px calc(40px + env(safe-ar
 .rq { font-size:13.5px; margin-top:4px; background:#faf8f3; border-radius:8px; padding:5px 8px; color:#4a443e; }
 .stsel { -webkit-appearance:none; appearance:none; border:0; border-radius:999px; padding:9px 14px; min-height:40px; font-weight:700; font-size:16px; text-align:center; text-align-last:center; }
 .st-requested { background:#fbeed0; color:#7a4b00; } .st-confirmed { background:#dcecfb; color:#12507f; } .st-visited { background:#dff1e0; color:#1f6b3a; }
+.st-left { background:#e6e9f2; color:#3b4a78; }
 .st-cancelled, .st-noshow, .st-rejected { background:#ece9e5; color:#6b645d; }
 .sbadge { font-size:12.5px; font-weight:700; padding:3px 10px; border-radius:999px; }
 
@@ -182,6 +183,9 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .dlg-acts { flex-wrap:wrap; }
 .dlg-acts .err { flex:0 0 100%; margin:0; font-weight:700; }
 .dlg-acts .err:empty { display:none; }
+.mvseats { margin-top:10px; }
+.mvseats .note { flex:0 0 100%; margin:0; }
+.mvseats button { min-height:40px; padding:0 14px; }
 .staffpick { padding:8px 0 0; }
 .staffpick button { min-height:36px; padding:0 12px; }
 .chips.wrap { flex-wrap:wrap; overflow:visible; }
@@ -300,8 +304,8 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 var SB = "https://txdoqsktqlgrngqxavqu.supabase.co";
 var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4ZG9xc2t0cWxncm5ncXhhdnF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxNzE4NTAsImV4cCI6MjExMDc0Nzg1MH0.GWwbAqVX6QliEIlQMb2TWEgqxe43lOUVsfHEhJgUVZ4";
 
-var STATUS = [["requested","신규"],["confirmed","예약"],["visited","방문"],["cancelled","취소"],["noshow","노쇼"],["rejected","취소"]];
-var STATUS4 = [["confirmed","예약"],["visited","방문"],["noshow","노쇼"],["cancelled","취소"]];
+var STATUS = [["requested","신규"],["confirmed","예약"],["visited","방문"],["left","나감"],["cancelled","취소"],["noshow","노쇼"],["rejected","취소"]];
+var STATUS4 = [["confirmed","예약"],["visited","방문"],["left","나감"],["noshow","노쇼"],["cancelled","취소"]];
 function normSt(v) { return v === "rejected" ? "cancelled" : v; }
 function statusOpts(sel, cur) {
   sel.innerHTML = "";
@@ -505,7 +509,7 @@ function quickStatus(x, st, sel) {
   }).catch(function (e) { sel.value = prev; sel.disabled = false; if (!authFail(e)) toast("저장하지 못했어요."); });
 }
 
-function tally(list) { var a = { n: 0, vis: 0, bad: 0, sales: 0 }; list.forEach(function (x) { a.n++; if (x.status === "visited") a.vis++; if (x.status === "cancelled" || x.status === "noshow" || x.status === "rejected") a.bad++; a.sales += x.sales_amount || 0; }); return a; }
+function tally(list) { var a = { n: 0, vis: 0, bad: 0, sales: 0 }; list.forEach(function (x) { a.n++; if (x.status === "visited" || x.status === "left") a.vis++; if (x.status === "cancelled" || x.status === "noshow" || x.status === "rejected") a.bad++; a.sales += x.sales_amount || 0; }); return a; }
 function fillTable(t, firstHead, groups, total) {
   t.innerHTML = "";
   var head = el("thead"), hr = el("tr"); [firstHead, "예약", "방문", "노쇼·취소", "금액(원)"].forEach(function (h) { hr.appendChild(el("th", null, h)); }); head.appendChild(hr); t.appendChild(head);
@@ -711,7 +715,7 @@ function openSeat(id, mode, noSync, notice) {
     err.textContent = "저장하지 못했어요. 새로고침(↻) 후 다시 해 주세요.";
   }
   function done(msg) { closeSeat(); if (msg) toast(msg); }
-  function release(x) { return saveSeat(x, seatList(x).filter(function (k) { return k !== id; }).join(", ")); }
+  function release(x) { return saveSeat(x, x.seat, "left"); }
   function close() {}
   function resvCard(x, withArrive) {
     var c = el("div", "res"); c.appendChild(el("div", "who", x.name + " · " + x.party_size + "명"));
@@ -740,9 +744,18 @@ function openSeat(id, mode, noSync, notice) {
         rpc("admin_save", { p_token: token, p: payloadOf(x, { staff: i1.value.trim(), orders: i2.value.trim(), sales_amount: rawNum(i3.value) }) }).then(function (row) { Object.keys(row).forEach(function (k) { x[k] = row[k]; }); render(); done("저장했어요."); }).catch(fail);
       });
       var fr = el("button", "btn ghost", "자리 비우기"); fr.type = "button"; fr.addEventListener("click", function () { release(x).then(function () { done(); }).catch(fail); });
-      var ed = el("button", "btn ghost", "전체 수정"); ed.type = "button"; ed.addEventListener("click", function () { closeSeat(); openEdit(x); });
+      var ed = el("button", "btn ghost", "좌석 이동"); ed.type = "button";
+      var mv = el("div", "chips wrap mvseats"); mv.hidden = true;
+      ed.addEventListener("click", function () {
+        if (!mv.hidden) { mv.hidden = true; return; }
+        mv.innerHTML = ""; var free = altSeats(id, date); SEATS.forEach(function (sx) { var k = sx[0]; if (k !== id && !seatMap(date)[k] && !/^R/.test(k) && free.indexOf(k) < 0) free.push(k); });
+        mv.appendChild(el("p", "note", "옮길 빈 자리를 눌러 주세요"));
+        free.forEach(function (k) { var b = el("button", null, k); b.type = "button"; b.addEventListener("click", function () {
+          saveSeat(x, seatList(x).map(function (q) { return q === id ? k : q; }).join(", ")).then(function () { done(id + " → " + k + " 로 옮겼어요."); }).catch(fail); }); mv.appendChild(b); });
+        mv.hidden = false; try { mv.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (e) {}
+      });
       var bar2 = el("div", "sbar"); sv.className = "btn full-w"; bar2.appendChild(sv);
-      var sub = el("div", "sbar2"); sub.appendChild(fr); sub.appendChild(ed); bar2.appendChild(sub); c.appendChild(bar2); body.appendChild(c);
+      var sub = el("div", "sbar2"); sub.appendChild(fr); sub.appendChild(ed); bar2.appendChild(sub); bar2.appendChild(mv); c.appendChild(bar2); body.appendChild(c);
     });
     if (resv.length) { body.appendChild(el("p", "note", "이 자리는 이후 예약도 잡혀 있어요.")); resv.forEach(function (x) { body.appendChild(resvCard(x, false)); }); }
     body.appendChild(err); close(); showSeat(); return;
