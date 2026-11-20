@@ -150,10 +150,6 @@ dialog::backdrop { background:rgba(23,18,15,.5); }
 .dh2 { display:flex; align-items:center; justify-content:space-between; margin:-4px -8px 0 0; }
 .dh-l { display:flex; align-items:center; gap:2px; min-width:0; }
 .dh-l .icon { margin-left:-10px; font-size:30px; }
-#pasteBox summary { list-style:none; display:flex; align-items:center; justify-content:space-between; min-height:46px; padding:0 14px; background:#fff; border:1px solid var(--line); border-radius:12px; font-weight:500; font-size:15px; cursor:pointer; }
-#pasteBox summary::-webkit-details-marker { display:none; }
-#pasteBox summary::after { content:"▾"; color:var(--muted); }
-#pasteBox[open] summary::after { content:"▴"; }
 .seatcard { padding:14px; }
 .sc-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
 .seatcard .meta { margin-top:2px; }
@@ -282,10 +278,6 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
   <form method="dialog" class="dlg" id="editForm">
     <div class="dh2"><h2 id="dTitle">새 예약</h2><button type="button" class="icon" id="eCancel" aria-label="닫기">✕</button></div>
     <div class="dscroll">
-    <details id="pasteBox"><summary>복사한 예약 양식으로 채우기</summary>
-      <textarea id="pasteTxt" style="margin-top:10px;min-height:128px" placeholder="1. 날짜 / 시간 : 11.20 금 / &#10;2. 예약명 / 담당 : 김동희ㆍ라온우진&#10;3. 인원 : 6&#10;4. 테이블 넘버 : B1&#10;5. 금액(바틀X) : &#10;6. 특이사항 :"></textarea>
-      <button type="button" class="btn ghost" id="pasteGo" style="margin-top:10px;width:100%">양식대로 채우기</button>
-    </details>
     <div><label for="eName">예약명</label><input type="text" id="eName" maxlength="60"></div>
     <div class="g2">
       <div><label for="eParty">인원</label><input type="number" id="eParty" min="1" max="100" inputmode="numeric"></div>
@@ -567,15 +559,6 @@ function parseForm(txt) {
   var rq = get(/특이|요청|비고/); if (rq) r.request = rq;
   return r;
 }
-$("pasteGo").addEventListener("click", function () {
-  var r = parseForm($("pasteTxt").value), got = 0;
-  if (r.date) { $("eDate").value = r.date; got++; }
-  if (r.name) { $("eName").value = r.name; got++; } if (r.staff) { $("eStaff").value = r.staff; got++; }
-  if (r.party) { $("eParty").value = r.party; got++; } if (r.seat) { $("eSeat").value = r.seat; got++; }
-  if (r.sales != null) { $("eSales").value = commaFmt(r.sales); got++; } if (r.request) { $("eReq").value = r.request; got++; }
-  $("eErr").textContent = got ? "" : "양식을 읽지 못했어요. '1. 날짜 / 시간 : ...' 모양인지 확인해 주세요.";
-  if (got) { $("pasteBox").open = false; toast("채웠어요. 확인하고 저장하세요."); }
-});
 
 /* ---------- tabs ---------- */
 function setTab(n) {
@@ -622,7 +605,7 @@ function openEdit(x) {
   $("eSales").value = x && x.sales_amount != null ? commaFmt(x.sales_amount) : "";
   $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eStaffPick").innerHTML = ""; $("eStaffPick").appendChild(staffPick($("eStaff"))); $("eOrders").value = x ? (x.orders || "") : "";
   statusOpts($("eStatus"), x ? x.status : "confirmed"); $("eStatusBox").hidden = !x; $("eOrdersBox").hidden = !x;
-  $("pasteTxt").value = ""; $("pasteBox").hidden = !!x; $("pasteBox").open = false;
+  
   $("eDel").hidden = !x; $("dlg").showModal(); try { document.activeElement.blur(); } catch (e) {}
 }
 $("newBtn").addEventListener("click", function () { openEdit(null); });
