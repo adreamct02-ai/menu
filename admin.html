@@ -180,6 +180,9 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .sfields textarea { padding:10px 12px; min-height:72px; }
 .crow { width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:12px; background:#fff; }
 .crow small { color:var(--muted); display:block; }
+.dlg-acts { flex-wrap:wrap; }
+.dlg-acts .err { flex:0 0 100%; margin:0; font-weight:700; }
+.dlg-acts .err:empty { display:none; }
 .staffpick { padding:8px 0 0; }
 .staffpick button { min-height:36px; padding:0 12px; }
 .chips.wrap { flex-wrap:wrap; overflow:visible; }
@@ -284,8 +287,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
     <div id="eStatusBox"><label for="eStatus">상태</label><select id="eStatus"></select></div>
     <div><label for="eReq">특이사항</label><textarea id="eReq" maxlength="500"></textarea></div>
     <div id="eOrdersBox"><label for="eOrders">주문 내용</label><textarea id="eOrders" maxlength="1000" placeholder="나중에 주문받은 뒤 적어도 돼요"></textarea></div>
-    <p class="err" id="eErr" role="alert"></p>
-    <div class="dlg-acts"><button type="button" class="btn danger" id="eDel">삭제</button><button type="submit" class="btn big" id="eSave">저장</button></div>
+    <div class="dlg-acts"><p class="err" id="eErr" role="alert"></p><button type="button" class="btn danger" id="eDel">삭제</button><button type="submit" class="btn big" id="eSave">저장</button></div>
   </form>
 </dialog>
 
@@ -586,9 +588,10 @@ $("eCancel").addEventListener("click", function () { $("dlg").close(); });
 $("editForm").addEventListener("submit", function (ev) {
   ev.preventDefault();
   var name = $("eName").value.trim(), date = $("eDate").value, party = parseInt($("eParty").value, 10);
-  if (!name) { $("eErr").textContent = "예약명을 적어 주세요."; return; }
-  if (!date) { $("eErr").textContent = "날짜를 골라 주세요."; return; }
-  if (!(party >= 1 && party <= 100)) { $("eErr").textContent = "인원은 1~100명으로 적어 주세요."; return; }
+  function bad(msg, id) { $("eErr").textContent = msg; var f = $(id); try { f.scrollIntoView({ block: "center", behavior: "smooth" }); f.focus({ preventScroll: true }); } catch (e) {} }
+  if (!name) { bad("예약명을 적어 주세요.", "eName"); return; }
+  if (!date) { bad("날짜를 골라 주세요.", "eDate"); return; }
+  if (!(party >= 1 && party <= 100)) { bad("인원은 1~100명으로 적어 주세요.", "eParty"); return; }
   var over = { name: name, party_size: String(party), visit_date: date, seat: $("eSeat").value.trim(), request: $("eReq").value.trim(), sales_amount: $("eSales").value, staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim() };
   var p;
   if (editing) { over.status = $("eStatus").value; p = payloadOf(editing, over); }
@@ -596,7 +599,7 @@ $("editForm").addEventListener("submit", function (ev) {
   var b = $("eSave"); b.disabled = true;
   if (p.staff) saveStaff(p.staff);
   rpc("admin_save", { p_token: token, p: p }).then(function () { $("dlg").close(); toast("저장했어요."); return load(true); })
-    .catch(function (x) { if (!authFail(x)) $("eErr").textContent = "저장하지 못했어요. 입력을 확인해 주세요."; })
+    .catch(function (x) { if (!authFail(x)) $("eErr").textContent = /seat_taken/.test(x.message) ? "이미 다른 손님이 앉은 자리예요. 새로고침(↻) 후 확인해 주세요." : "저장하지 못했어요. 입력을 확인해 주세요."; })
     .then(function () { b.disabled = false; });
 });
 $("eDel").addEventListener("click", function () {
