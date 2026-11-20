@@ -239,7 +239,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
     <section id="listView" hidden>
       <div class="seg" id="fRangeSeg" role="group" aria-label="기간"></div>
       <div class="chips" id="fStaff" role="group" aria-label="담당" hidden></div>
-      <input type="search" id="fQ" placeholder="이름 · 연락처 · 담당 · 자리 검색" aria-label="검색">
+      <input type="search" id="fQ" placeholder="예약명 · 연락처 · 담당 · 자리 검색" aria-label="검색">
       <div class="list" id="list"></div>
       <div class="dl"><button class="btn ghost" id="csvBtn" type="button">지금 보이는 목록 엑셀로 받기</button></div>
     </section>
@@ -262,7 +262,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
       <textarea id="pasteTxt" style="margin-top:10px;min-height:128px" placeholder="1. 날짜 / 시간 : 11.20 금 / &#10;2. 예약명 / 담당 : 김동희ㆍ라온우진&#10;3. 인원 : 6&#10;4. 테이블 넘버 : B1&#10;5. 금액(바틀X) : &#10;6. 특이사항 :"></textarea>
       <button type="button" class="btn ghost" id="pasteGo" style="margin-top:10px;width:100%">양식대로 채우기</button>
     </details>
-    <div><label for="eName">이름</label><input type="text" id="eName" maxlength="60"></div>
+    <div><label for="eName">예약명</label><input type="text" id="eName" maxlength="60"></div>
     <div class="g2">
       <div><label for="eParty">인원</label><input type="number" id="eParty" min="1" max="100" inputmode="numeric"></div>
       <div><label for="eSales">금액(원)</label><input type="number" id="eSales" min="0" inputmode="numeric" placeholder="나중에 넣어도 돼요"></div>
@@ -569,7 +569,7 @@ $("eCancel").addEventListener("click", function () { $("dlg").close(); });
 $("editForm").addEventListener("submit", function (ev) {
   ev.preventDefault();
   var name = $("eName").value.trim(), date = $("eDate").value, party = parseInt($("eParty").value, 10);
-  if (!name) { $("eErr").textContent = "이름을 적어 주세요."; return; }
+  if (!name) { $("eErr").textContent = "예약명을 적어 주세요."; return; }
   if (!date) { $("eErr").textContent = "날짜를 골라 주세요."; return; }
   if (!(party >= 1 && party <= 100)) { $("eErr").textContent = "인원은 1~100명으로 적어 주세요."; return; }
   var over = { name: name, party_size: String(party), visit_date: date, seat: $("eSeat").value.trim(), request: $("eReq").value.trim(), sales_amount: $("eSales").value, staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim() };
@@ -741,7 +741,7 @@ function openSeat(id, mode, noSync, notice) {
     if (!sel) { area.appendChild(el("p", "note", "위에서 내 이름을 누르면 내 예약 손님이 떠요.")); return; }
     if (sel === "walk") {
       function fld(label, node) { var l = el("label", null, label); l.appendChild(node); area.appendChild(l); return node; }
-      var n1 = document.createElement("input"); n1.maxLength = 60; n1.placeholder = "비워두면 '현장 손님'"; fld("이름", n1);
+      var n1 = document.createElement("input"); n1.maxLength = 60; n1.placeholder = "비워두면 '현장 손님'"; fld("예약명", n1);
       var g2 = el("div", "g2"); area.appendChild(g2);
       var n2 = document.createElement("input"); n2.type = "number"; n2.min = 1; n2.max = 100; n2.value = 2; n2.inputMode = "numeric";
       var n3 = document.createElement("input"); n3.setAttribute("list", "staffs"); n3.maxLength = 40; n3.value = lastStaff(); n3.placeholder = "예: 균";
@@ -839,7 +839,7 @@ $("mToday").addEventListener("click", function () { $("mDate").value = todayStr(
 
 /* ---------- csv ---------- */
 $("csvBtn").addEventListener("click", function () {
-  var head = ["예약번호","날짜","이름","인원","상태","좌석","담당","금액","특이사항","주문","경로"];
+  var head = ["예약번호","날짜","예약명","인원","상태","좌석","담당","금액","특이사항","주문","경로"];
   function q(v) { v = v == null ? "" : String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
   var lines = [head.map(q).join(",")];
   filtered().forEach(function (x) { lines.push([x.code, x.visit_date, x.name, x.party_size, labelOf(STATUS, x.status), x.seat, x.staff, x.sales_amount, x.request, x.orders, SRC[x.source]].map(q).join(",")); });
