@@ -188,6 +188,8 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .pager button { min-width:44px; min-height:44px; border:1px solid var(--line); background:#fff; border-radius:12px; font-weight:600; font-size:16px; }
 .pager button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
 .pager button:disabled { opacity:.35; }
+.askbox { margin-top:10px; display:grid; gap:8px; padding:12px; background:#fff; border:1px solid var(--line); border-radius:14px; }
+.askbox .note { margin:0; font-weight:600; }
 .mvseats { margin-top:10px; }
 .mvseats .note { flex:0 0 100%; margin:0; }
 .mvseats button { min-height:40px; padding:0 14px; }
@@ -737,7 +739,21 @@ function openSeat(id, mode, noSync, notice) {
         if (i1.value.trim()) saveStaff(i1.value.trim());
         rpc("admin_save", { p_token: token, p: payloadOf(x, { staff: i1.value.trim(), orders: i2.value.trim(), sales_amount: rawNum(i3.value) }) }).then(function (row) { Object.keys(row).forEach(function (k) { x[k] = row[k]; }); render(); done("저장했어요."); }).catch(fail);
       });
-      var fr = el("button", "btn ghost", "자리 비우기"); fr.type = "button"; fr.addEventListener("click", function () { release(x).then(function () { done(); }).catch(fail); });
+      var fr = el("button", "btn ghost", "자리 비우기"); fr.type = "button";
+      var ask = el("div", "askbox"); ask.hidden = true;
+      fr.addEventListener("click", function () {
+        var ss = seatList(x);
+        if (ss.length < 2) { release(x).then(function () { done(); }).catch(fail); return; }
+        ask.innerHTML = ""; ask.hidden = false;
+        ask.appendChild(el("p", "note", x.name + " 님이 " + ss.join(", ") + " 자리를 쓰고 있어요. 어떻게 할까요?"));
+        var o1 = el("button", "btn", id + " 자리만 비우기"); o1.type = "button";
+        o1.addEventListener("click", function () { saveSeat(x, ss.filter(function (k) { return k !== id; }).join(", ")).then(function () { done(id + " 자리를 비웠어요."); }).catch(fail); });
+        var o2 = el("button", "btn ghost", "모든 자리 비우기 (나감)"); o2.type = "button";
+        o2.addEventListener("click", function () { release(x).then(function () { done(); }).catch(fail); });
+        var o3 = el("button", "btn ghost", "취소"); o3.type = "button"; o3.addEventListener("click", function () { ask.hidden = true; });
+        ask.appendChild(o1); ask.appendChild(o2); ask.appendChild(o3);
+        try { ask.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (e) {}
+      });
       var ed = el("button", "btn ghost", "좌석 이동"); ed.type = "button";
       var mv = el("div", "chips wrap mvseats"); mv.hidden = true;
       ed.addEventListener("click", function () {
@@ -749,7 +765,7 @@ function openSeat(id, mode, noSync, notice) {
         mv.hidden = false; try { mv.scrollIntoView({ block: "nearest", behavior: "smooth" }); } catch (e) {}
       });
       var bar2 = el("div", "sbar"); sv.className = "btn full-w"; bar2.appendChild(sv);
-      var sub = el("div", "sbar2"); sub.appendChild(fr); sub.appendChild(ed); bar2.appendChild(sub); bar2.appendChild(mv); c.appendChild(bar2); body.appendChild(c);
+      var sub = el("div", "sbar2"); sub.appendChild(fr); sub.appendChild(ed); bar2.appendChild(sub); bar2.appendChild(mv); bar2.appendChild(ask); c.appendChild(bar2); body.appendChild(c);
     });
     if (resv.length) { body.appendChild(el("p", "note", "이 자리는 이후 예약도 잡혀 있어요.")); resv.forEach(function (x) { body.appendChild(resvCard(x, false)); }); }
     body.appendChild(err); close(); showSeat(); return;
