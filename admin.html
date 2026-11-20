@@ -596,6 +596,9 @@ moneyInput($("eSales"));
     });
   }
   vv.addEventListener("resize", fit); vv.addEventListener("scroll", fit);
+  setInterval(function () { if ($("dlg").open || $("sDlg").open) fit(); }, 400); /* safety net: iOS sometimes skips the keyboard-closed event */
+  window.addEventListener("orientationchange", function () { setTimeout(fit, 400); });
+  document.addEventListener("touchend", function (e) { var t = e.target; if (t && t.closest && !t.closest("input,textarea,select,label,button")) setTimeout(fit, 350); }, { passive: true });
   document.addEventListener("focusin", function (e) {
     var t = e.target; if (!t.closest || !t.closest("dialog")) return;
     setTimeout(function () { fit(); try { t.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (x) {} }, 320);
