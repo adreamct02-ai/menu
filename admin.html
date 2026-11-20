@@ -277,6 +277,9 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
 .picklist button { background:#fff; border-color:#e2dbcf; color:var(--ink); }
 .picklist button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
 .chips button.act { border-color:#b9ad9c; }
+/* tabs: no fill colors; selected = bold with a dark outline */
+.tabs4 button, .tabs4 button.act, .tabs4 button[aria-selected="true"], .tabs4 button.act[aria-selected="true"] { background:#fff; color:var(--ink); border:1px solid #e6e0d6; font-weight:500; box-shadow:none; }
+.tabs4 button[aria-selected="true"] { border:1.5px solid var(--ink); font-weight:700; }
 </style>
 </head>
 <body>
