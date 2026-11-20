@@ -130,10 +130,25 @@ dialog::backdrop { background:rgba(23,18,15,.5); }
 @media (min-width:700px) { dialog { margin:auto; border-radius:20px; } }
 .dlg { padding:14px 16px calc(14px + env(safe-area-inset-bottom)); display:grid; gap:10px; width:100%; }
 .dlg > * { min-width:0; }
-.dh2 { display:flex; align-items:center; justify-content:space-between; }
+.dh2 { display:flex; align-items:center; justify-content:space-between; margin:-4px -8px 0 0; }
+.dh-l { display:flex; align-items:center; gap:2px; min-width:0; }
+.dh-l .icon { margin-left:-10px; font-size:30px; }
+#pasteBox summary { list-style:none; display:flex; align-items:center; justify-content:space-between; min-height:46px; padding:0 14px; background:#fff; border:1px solid var(--line); border-radius:12px; font-weight:500; font-size:15px; cursor:pointer; }
+#pasteBox summary::-webkit-details-marker { display:none; }
+#pasteBox summary::after { content:"▾"; color:var(--muted); }
+#pasteBox[open] summary::after { content:"▴"; }
+.seatcard { padding:14px; }
+.sc-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.seatcard .meta { margin-top:2px; }
+.seatcard .rq { margin:8px 0 0; }
+.seatcard .sfields { margin-top:12px; gap:12px; }
+.sbar { display:grid; gap:8px; margin-top:14px; }
+.sbar .btn { min-height:48px; }
+.sbar2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .dlg h2 { margin:0; font-size:19px; }
 .dlg label { display:block; font-weight:700; font-size:13.5px; margin-bottom:5px; }
 .dlg input, .dlg select, .dlg textarea { width:100%; max-width:100%; min-width:0; min-height:46px; padding:0 12px; font-size:16px; border:1px solid var(--line); border-radius:12px; background:#fff; -webkit-appearance:none; appearance:none; text-align:left; display:block; }
+.dlg textarea, .sfields textarea { resize:none; }
 .dlg textarea { padding:10px 12px; min-height:56px; }
 .dlg input[type=date] { display:flex; align-items:center; line-height:1.2; }
 .dlg input[type=date]::-webkit-date-and-time-value { min-height:1.4em; margin:0; }
@@ -227,8 +242,6 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
       <div class="tiles" id="perfTiles"></div>
       <h2 class="sec">담당별</h2>
       <div class="scroll"><table id="staffTable"></table></div>
-      <h2 class="sec">유입 채널별 (예약 링크로 들어온 경우)</h2>
-      <div class="scroll"><table id="perfTable"></table></div>
       <p class="note">금액은 예약이나 좌석을 눌러 직접 입력한 값이에요.</p>
     </section>
   </main>
@@ -239,9 +252,9 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 <dialog id="dlg">
   <form method="dialog" class="dlg" id="editForm">
     <div class="dh2"><h2 id="dTitle">새 예약</h2><button type="button" class="icon" id="eCancel" aria-label="닫기">✕</button></div>
-    <details id="pasteBox"><summary style="cursor:pointer;font-weight:700;font-size:13px">팀 예약 양식 붙여넣어 채우기</summary>
-      <textarea id="pasteTxt" style="margin-top:8px;min-height:120px" placeholder="1. 날짜 / 시간 : 11.20 금 / &#10;2. 예약명 / 담당 : 김동희ㆍ라온우진&#10;3. 인원 : 6&#10;4. 테이블 넘버 : B1&#10;5. 금액(바틀X) : &#10;6. 특이사항 :"></textarea>
-      <button type="button" class="btn ghost" id="pasteGo" style="margin-top:8px">양식대로 채우기</button>
+    <details id="pasteBox"><summary>복사한 예약 양식으로 채우기</summary>
+      <textarea id="pasteTxt" style="margin-top:10px;min-height:128px" placeholder="1. 날짜 / 시간 : 11.20 금 / &#10;2. 예약명 / 담당 : 김동희ㆍ라온우진&#10;3. 인원 : 6&#10;4. 테이블 넘버 : B1&#10;5. 금액(바틀X) : &#10;6. 특이사항 :"></textarea>
+      <button type="button" class="btn ghost" id="pasteGo" style="margin-top:10px;width:100%">양식대로 채우기</button>
     </details>
     <div><label for="eName">이름</label><input type="text" id="eName" maxlength="60"></div>
     <div class="g2">
@@ -282,7 +295,6 @@ function statusOpts(sel, cur) {
 }
 function tomorrowStr() { var p = todayStr().split("-"), d = new Date(+p[0], +p[1] - 1, +p[2] + 1); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
 var CTYPE = [["phone","전화번호"],["instagram","인스타그램"],["kakao","카카오톡"],["wechat","WeChat"],["line","LINE"],["none","연락처 없음"]];
-var CHANNELS = [["GH01","게스트하우스"],["CN01","중국 SNS"],["JP01","일본 SNS"],["CM01","커뮤니티"],["TA01","여행사"],["IN01","인플루언서"],["DIRECT","직접·전화"],["ETC","기타"]];
 var SRC = { web:"사이트", manual:"직접 입력" };
 var DAYS = ["일","월","화","수","목","금","토"];
 
@@ -400,7 +412,7 @@ function filtered() {
 }
 
 /* ---------- render ---------- */
-function render() { buildStaffUi(); renderStats(); renderList(); renderPerf(); renderStaff(); renderTiles(); if (!$("seatView").hidden) buildMap(); }
+function render() { buildStaffUi(); renderStats(); renderList(); renderStaff(); renderTiles(); if (!$("seatView").hidden) buildMap(); }
 
 function renderStats() {
   var wait = rows.filter(function (x) { return x.status === "requested"; }).length, b = $("navBadge");
@@ -470,10 +482,6 @@ function fillTable(t, firstHead, groups, total) {
   if (!groups.length) { var er = el("tr"), ed = el("td", "empty", "아직 예약이 없어요."); ed.colSpan = 5; ed.style.textAlign = "center"; er.appendChild(ed); body.appendChild(er); }
   t.appendChild(body);
   if (groups.length > 1) { var foot = el("tfoot"), fr = el("tr"); fr.appendChild(el("td", null, "합계")); [total.n, total.vis, total.bad, won(total.sales)].forEach(function (v) { fr.appendChild(el("td", null, String(v))); }); foot.appendChild(fr); t.appendChild(foot); }
-}
-function renderPerf() {
-  var by = {}, keys = []; rows.forEach(function (x) { var k = x.channel ? x.channel + " " + labelOf(CHANNELS, x.channel) : "채널 없음"; if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(x); });
-  fillTable($("perfTable"), "유입 채널", keys.map(function (k) { return [k, tally(by[k])]; }).sort(function (a, b) { return b[1].n - a[1].n; }), tally(rows));
 }
 function renderTiles() {
   var box = $("perfTiles"); box.innerHTML = ""; var a = tally(rows);
@@ -624,12 +632,18 @@ function altSeats(id, date) {
 function openSeat(id, mode) {
   var date = $("mDate").value || todayStr(), occ = seatMap(date)[id] || [], body = $("sBody"); body.innerHTML = "";
   var seated = occ.filter(function (x) { return x.status === "visited"; }), resv = occ.filter(function (x) { return x.status !== "visited"; });
-  body.appendChild(el("h2", null, "좌석 " + id + " · " + date.slice(5).replace("-", "/")));
+  function head(title, back) {
+    var h = el("div", "dh2"), l = el("div", "dh-l");
+    if (back) { var bb = el("button", "icon", "‹"); bb.type = "button"; bb.setAttribute("aria-label", "뒤로"); bb.addEventListener("click", back); l.appendChild(bb); }
+    l.appendChild(el("h2", null, title)); h.appendChild(l);
+    var x = el("button", "icon", "✕"); x.type = "button"; x.setAttribute("aria-label", "닫기"); x.addEventListener("click", closeSeat); h.appendChild(x); return h;
+  }
+  body.appendChild(head("좌석 " + id + " · " + date.slice(5).replace("-", "/")));
   var err = el("p", "err"); err.setAttribute("role", "alert");
   function fail(e) { if (!authFail(e)) err.textContent = "저장하지 못했어요."; }
   function done(msg) { closeSeat(); if (msg) toast(msg); }
   function release(x) { return saveSeat(x, seatList(x).filter(function (k) { return k !== id; }).join(", ")); }
-  function close() { var cl = el("button", "btn ghost", "닫기"); cl.type = "button"; cl.addEventListener("click", closeSeat); body.appendChild(cl); }
+  function close() {}
   function resvCard(x, withArrive) {
     var c = el("div", "res"); c.appendChild(el("div", "who", x.name + " · " + x.party_size + "명"));
     c.appendChild(el("div", "meta", untilText(x, date) + (x.staff ? " · 담당 " + x.staff : "")));
@@ -642,24 +656,24 @@ function openSeat(id, mode) {
 
   if (seated.length) {
     seated.forEach(function (x) {
-      var c = el("div", "res"); c.appendChild(el("div", "who", x.name + " · " + x.party_size + "명"));
-      var ct = x.contact_type === "none" || !x.contact ? "연락처 없음" : labelOf(CTYPE, x.contact_type) + " " + x.contact;
-      c.appendChild(el("div", "meta", (x.visit_time || "시간 미정") + " · " + ct + (x.channel ? " · 채널 " + x.channel : "")));
-      if (x.request) c.appendChild(el("div", "meta", "요청: " + x.request));
+      var c = el("div", "res seatcard"), top = el("div", "sc-top"); top.appendChild(el("div", "who", x.name + " · " + x.party_size + "명")); top.appendChild(el("span", "sbadge st-visited", "방문")); c.appendChild(top);
+      var info = []; if (x.visit_time) info.push((x.channel === "DIRECT" ? "도착 " : "예약 ") + x.visit_time); if (x.contact && x.contact_type !== "none") info.push(labelOf(CTYPE, x.contact_type) + " " + x.contact);
+      if (info.length) c.appendChild(el("div", "meta", info.join(" · ")));
+      if (x.request) c.appendChild(el("div", "rq", "특이사항: " + x.request));
       var f = el("div", "sfields");
       var l1 = el("label", null, "담당"), i1 = document.createElement("input"); i1.setAttribute("list", "staffs"); i1.maxLength = 40; i1.value = x.staff || ""; l1.appendChild(i1);
       var l2 = el("label", null, "주문 내용 (나중에 적어도 돼요)"), i2 = document.createElement("textarea"); i2.maxLength = 1000; i2.value = x.orders || ""; l2.appendChild(i2);
       var l3 = el("label", null, "금액(원)"), i3 = document.createElement("input"); i3.type = "number"; i3.min = 0; i3.inputMode = "numeric"; i3.value = x.sales_amount == null ? "" : x.sales_amount; l3.appendChild(i3);
       f.appendChild(l1); f.appendChild(l2); f.appendChild(l3); c.appendChild(f);
-      var bar = el("div", "res-bot");
       var sv = el("button", "btn", "저장"); sv.type = "button";
       sv.addEventListener("click", function () {
         if (i1.value.trim()) saveStaff(i1.value.trim());
         rpc("admin_save", { p_token: token, p: payloadOf(x, { staff: i1.value.trim(), orders: i2.value.trim(), sales_amount: i3.value }) }).then(function (row) { Object.keys(row).forEach(function (k) { x[k] = row[k]; }); render(); done("저장했어요."); }).catch(fail);
       });
-      var fr = el("button", "btn ghost", "이 자리 비우기"); fr.type = "button"; fr.addEventListener("click", function () { release(x).then(function () { done(); }).catch(fail); });
+      var fr = el("button", "btn ghost", "자리 비우기"); fr.type = "button"; fr.addEventListener("click", function () { release(x).then(function () { done(); }).catch(fail); });
       var ed = el("button", "btn ghost", "전체 수정"); ed.type = "button"; ed.addEventListener("click", function () { closeSeat(); openEdit(x); });
-      bar.appendChild(sv); bar.appendChild(fr); bar.appendChild(ed); c.appendChild(bar); body.appendChild(c);
+      var bar2 = el("div", "sbar"); sv.className = "btn full-w"; bar2.appendChild(sv);
+      var sub = el("div", "sbar2"); sub.appendChild(fr); sub.appendChild(ed); bar2.appendChild(sub); c.appendChild(bar2); body.appendChild(c);
     });
     if (resv.length) { body.appendChild(el("p", "note", "이 자리는 이후 예약도 잡혀 있어요.")); resv.forEach(function (x) { body.appendChild(resvCard(x, false)); }); }
     body.appendChild(err); close(); showSeat(); return;
@@ -671,12 +685,12 @@ function openSeat(id, mode) {
     var b1 = el("button", "btn", "그냥 고객 넣기"); b1.type = "button"; b1.addEventListener("click", function () { openSeat(id, "free"); });
     var b2 = el("button", "btn ghost", "다른 자리 안내하기"); b2.type = "button";
     b2.addEventListener("click", function () {
-      var alts = altSeats(id, date); body.innerHTML = ""; body.appendChild(el("h2", null, "비어 있는 다른 자리"));
+      var alts = altSeats(id, date); body.innerHTML = ""; body.appendChild(head("비어 있는 다른 자리", function () { openSeat(id); }));
       body.appendChild(el("p", "note", "예약이 없는 자리예요. 누르면 그 자리로 이동해요."));
       var g = el("div", "altgrid");
       alts.forEach(function (k) { var b = el("button", "btn ghost", k); b.type = "button"; b.addEventListener("click", function () { openSeat(k, "free"); }); g.appendChild(b); });
       if (!alts.length) g.appendChild(el("p", "note", "비어 있는 자리가 없어요."));
-      body.appendChild(g); var back = el("button", "btn ghost", "뒤로"); back.type = "button"; back.addEventListener("click", function () { openSeat(id); }); body.appendChild(back); close();
+      body.appendChild(g);
     });
     var row = el("div", "res-bot"); row.appendChild(b1); row.appendChild(b2); body.appendChild(row);
     body.appendChild(err); close(); showSeat(); return;
