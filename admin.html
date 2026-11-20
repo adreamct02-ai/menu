@@ -151,6 +151,14 @@ dialog #sBody { padding-bottom:calc(18px + env(safe-area-inset-bottom)); }
 dialog { border:0; padding:0; width:100%; max-width:560px; max-height:94vh; max-height:94dvh; margin:auto auto 0; border-radius:22px 22px 0 0; background:var(--bg); color:var(--ink); overflow-x:hidden; overflow-y:auto; }
 dialog::backdrop { background:rgba(23,18,15,.5); }
 @media (min-width:700px) { dialog { margin:auto; border-radius:20px; } }
+/* edit form = a normal page (not a floating sheet): iOS handles the keyboard natively */
+body.editing .top, body.editing main { display:none !important; }
+#dlg, #dlg[open] { position:static !important; display:block; width:100%; max-width:640px; max-height:none !important; margin:0 auto !important; border-radius:0; overflow:visible; background:var(--bg); }
+#dlg:not([open]) { display:none; }
+#editForm { display:block; padding:0 16px 60px; }
+#editForm .dh2 { position:sticky; top:0; z-index:5; background:var(--bg); margin:0 -16px; padding:calc(10px + env(safe-area-inset-top)) 16px 10px; border-bottom:1px solid var(--line); }
+.dscroll { overflow:visible !important; padding-top:12px; }
+#editForm .dlg-acts { margin:0; padding:6px 0 0; border:0; }
 .dlg { padding:14px 16px calc(14px + env(safe-area-inset-bottom)); display:grid; gap:10px; width:100%; }
 .dlg > * { min-width:0; }
 .dh2 { display:flex; align-items:center; justify-content:space-between; margin:-4px -8px 0 0; }
@@ -593,24 +601,9 @@ function commaFmt(v) { var d = String(v == null ? "" : v).replace(/\D/g, "").rep
 function rawNum(v) { return String(v || "").replace(/\D/g, ""); }
 function moneyInput(inp) { inp.type = "text"; inp.inputMode = "numeric"; inp.autocomplete = "off"; inp.value = commaFmt(inp.value); inp.addEventListener("input", function () { inp.value = commaFmt(inp.value); }); return inp; }
 moneyInput($("eSales"));
-/* Tapping a button while the keyboard is up: iOS closes the keyboard first and the sheet shifts,
-   so the tap lands on another field. Handle the tap ourselves, before anything moves. */
-(function () {
-  var ts = null;
-  document.addEventListener("touchstart", function (e) {
-    var b = e.target.closest && e.target.closest("dialog button"), a = document.activeElement, t = e.touches[0];
-    if (!b || e.touches.length > 1 || !a || !/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) { ts = null; return; }
-    ts = { b: b, x: t.clientX, y: t.clientY }; e.preventDefault();
-  }, { passive: false });
-  document.addEventListener("touchend", function (e) {
-    if (!ts) return; var t = e.changedTouches[0], c = ts; ts = null;
-    e.preventDefault();
-    if (Math.abs(t.clientX - c.x) < 12 && Math.abs(t.clientY - c.y) < 12 && !c.b.disabled) c.b.click();
-  }, { passive: false });
-  document.addEventListener("touchcancel", function () { ts = null; }, { passive: true });
-})();
-
 /* ---------- edit dialog ---------- */
+var editScroll = 0;
+$("dlg").addEventListener("close", function () { document.body.classList.remove("editing"); window.scrollTo(0, editScroll); });
 function openEdit(x) {
   editing = x || null; $("eErr").textContent = "";
   $("dTitle").textContent = x ? "예약 수정" : "새 예약";
@@ -622,7 +615,7 @@ function openEdit(x) {
   $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eStaffPick").innerHTML = ""; $("eStaffPick").appendChild(staffPick($("eStaff"))); $("eOrders").value = x ? (x.orders || "") : "";
   statusOpts($("eStatus"), x ? x.status : "confirmed"); $("eStatusBox").hidden = !x; $("eOrdersBox").hidden = !x;
   
-  $("eDel").hidden = !x; $("eActs").hidden = !x; $("dlg").showModal(); try { document.activeElement.blur(); } catch (e) {}
+  $("eDel").hidden = !x; $("eActs").hidden = !x; editScroll = window.scrollY; document.body.classList.add("editing"); $("dlg").show(); window.scrollTo(0, 0); try { document.activeElement.blur(); } catch (e) {}
 }
 $("newBtn").addEventListener("click", function () { openEdit(null); });
 $("eCancel").addEventListener("click", function () { $("dlg").close(); });
