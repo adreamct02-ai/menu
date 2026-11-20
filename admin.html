@@ -133,7 +133,12 @@ tfoot td { font-weight:700; background:#f8f6f2; border-top:1px solid var(--line)
 
 /* dialogs: bottom sheet on phones */
 dialog { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; max-height:88vh !important; max-height:88dvh !important; }
-dialog .dlg-acts { position:sticky; bottom:0; z-index:5; background:var(--bg); margin:0 -16px; padding:10px 16px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); }
+#dlg { overflow:hidden; }
+#dlg[open] { display:flex; flex-direction:column; }
+#editForm { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; gap:0; padding-bottom:0; }
+#editForm .dh2 { flex:none; padding-bottom:10px; }
+.dscroll { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; display:grid; gap:10px; align-content:start; padding-bottom:14px; }
+#editForm .dlg-acts { position:static; flex:none; background:var(--bg); margin:0 -16px; padding:10px 16px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); }
 dialog .dlg { padding-bottom:0; }
 dialog #sBody { padding-bottom:calc(18px + env(safe-area-inset-bottom)); }
 #eSeat::placeholder { font-size:14px; }
@@ -272,6 +277,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 <dialog id="dlg">
   <form method="dialog" class="dlg" id="editForm">
     <div class="dh2"><h2 id="dTitle">새 예약</h2><button type="button" class="icon" id="eCancel" aria-label="닫기">✕</button></div>
+    <div class="dscroll">
     <details id="pasteBox"><summary>복사한 예약 양식으로 채우기</summary>
       <textarea id="pasteTxt" style="margin-top:10px;min-height:128px" placeholder="1. 날짜 / 시간 : 11.20 금 / &#10;2. 예약명 / 담당 : 김동희ㆍ라온우진&#10;3. 인원 : 6&#10;4. 테이블 넘버 : B1&#10;5. 금액(바틀X) : &#10;6. 특이사항 :"></textarea>
       <button type="button" class="btn ghost" id="pasteGo" style="margin-top:10px;width:100%">양식대로 채우기</button>
@@ -290,6 +296,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
     <div id="eStatusBox"><label for="eStatus">상태</label><select id="eStatus"></select></div>
     <div><label for="eReq">특이사항</label><textarea id="eReq" maxlength="500"></textarea></div>
     <div id="eOrdersBox"><label for="eOrders">주문 내용</label><textarea id="eOrders" maxlength="1000" placeholder="나중에 주문받은 뒤 적어도 돼요"></textarea></div>
+    </div>
     <div class="dlg-acts"><p class="err" id="eErr" role="alert"></p><button type="button" class="btn danger" id="eDel">삭제</button><button type="submit" class="btn big" id="eSave">저장</button></div>
   </form>
 </dialog>
