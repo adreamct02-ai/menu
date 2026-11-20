@@ -153,6 +153,10 @@ dialog::backdrop { background:rgba(23,18,15,.5); }
 @media (min-width:700px) { dialog { margin:auto; border-radius:20px; } }
 /* edit form = a normal page (not a floating sheet): iOS handles the keyboard natively */
 body.editing .top, body.editing main { display:none !important; }
+#sDlg:not([open]) { display:none; }
+#sDlg, #sDlg[open] { position:static !important; display:block; width:100%; max-width:640px; max-height:none !important; margin:0 auto !important; border-radius:0; overflow:visible; background:var(--bg); }
+#sDlg .dlg { padding:0 16px 80px; }
+#sDlg .dh2 { position:sticky; top:0; z-index:5; background:var(--bg); margin:0 -16px; padding:calc(10px + env(safe-area-inset-top)) 16px 10px; border-bottom:1px solid var(--line); }
 #dlg, #dlg[open] { position:static !important; display:block; width:100%; max-width:640px; max-height:none !important; margin:0 auto !important; border-radius:0; overflow:visible; background:var(--bg); }
 #dlg:not([open]) { display:none; }
 #editForm { display:block; padding:0 16px 60px; }
@@ -603,7 +607,8 @@ function moneyInput(inp) { inp.type = "text"; inp.inputMode = "numeric"; inp.aut
 moneyInput($("eSales"));
 /* ---------- edit dialog ---------- */
 var editScroll = 0;
-$("dlg").addEventListener("close", function () { document.body.classList.remove("editing"); window.scrollTo(0, editScroll); });
+function editingSync() { if ($("dlg").open || $("sDlg").open) return; document.body.classList.remove("editing"); window.scrollTo(0, editScroll); }
+$("dlg").addEventListener("close", editingSync); $("sDlg").addEventListener("close", editingSync);
 function openEdit(x) {
   editing = x || null; $("eErr").textContent = "";
   $("dTitle").textContent = x ? "예약 수정" : "새 예약";
@@ -615,7 +620,7 @@ function openEdit(x) {
   $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eStaffPick").innerHTML = ""; $("eStaffPick").appendChild(staffPick($("eStaff"))); $("eOrders").value = x ? (x.orders || "") : "";
   statusOpts($("eStatus"), x ? x.status : "confirmed"); $("eStatusBox").hidden = !x; $("eOrdersBox").hidden = !x;
   
-  $("eDel").hidden = !x; $("eActs").hidden = !x; editScroll = window.scrollY; document.body.classList.add("editing"); $("dlg").show(); window.scrollTo(0, 0); try { document.activeElement.blur(); } catch (e) {}
+  $("eDel").hidden = !x; $("eActs").hidden = !x; if (!document.body.classList.contains("editing")) editScroll = window.scrollY; document.body.classList.add("editing"); $("dlg").show(); window.scrollTo(0, 0); try { document.activeElement.blur(); } catch (e) {}
 }
 $("newBtn").addEventListener("click", function () { openEdit(null); });
 $("eCancel").addEventListener("click", function () { $("dlg").close(); });
@@ -676,7 +681,7 @@ $("mNext").addEventListener("click", function () { shiftDay(1); });
 var seatCtx = null;
 function occSig(id, date) { return JSON.stringify((seatMap(date)[id] || []).map(function (x) { return x.id + x.status + (x.seat || ""); })); }
 function showSeat() {
-  if (!$("sDlg").open) $("sDlg").showModal(); try { document.activeElement.blur(); } catch (e) {}
+  if (!$("sDlg").open) { editScroll = window.scrollY; document.body.classList.add("editing"); $("sDlg").show(); window.scrollTo(0, 0); } try { document.activeElement.blur(); } catch (e) {}
   var c = seatCtx; if (!c || c.noSync) return; c.noSync = true;
   load(true).then(function () { if ($("sDlg").open && seatCtx === c && occSig(c.id, c.date) !== c.sig) openSeat(c.id, undefined, true, "방금 다른 사람이 이 자리를 바꿨어요. 최신 상태로 새로고침했어요."); });
 }
