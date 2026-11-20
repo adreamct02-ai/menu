@@ -806,10 +806,11 @@ function openSeat(id, mode, noSync, notice) {
     chipBox.innerHTML = "";
     var opts = names.map(function (n) { return [n, n + " (" + cnt[n] + ")"]; });
     if (cnt._none) opts.push(["_none", "담당 없음 (" + cnt._none + ")"]);
-    opts.push(["walk", "예약 없이 온 손님"]);
-    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; page = 0; if (sel !== "walk" && sel !== "_none") saveStaff(sel); draw(); }); chipBox.appendChild(b); });
+    opts.push(["walk", "예약 없이 온 손님"]); if (sitting.length) opts.push(["add", "좌석 추가"]);
+    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; page = 0; if (sel !== "walk" && sel !== "_none" && sel !== "add") saveStaff(sel); draw(); }); chipBox.appendChild(b); });
     area.innerHTML = ""; err.textContent = "";
     if (!sel) { area.appendChild(el("p", "note", "위에서 내 이름을 누르면 내 예약 손님이 떠요.")); return; }
+    if (sel === "add") { apage = 0; area.appendChild(addBox); drawAdd(); return; }
     if (sel === "walk") {
       function fld(label, node) { var l = el("label", null, label); l.appendChild(node); area.appendChild(l); return node; }
       var n1 = document.createElement("input"); n1.maxLength = 60; n1.placeholder = "비워두면 '현장 손님'"; fld("예약명", n1);
@@ -855,8 +856,8 @@ function openSeat(id, mode, noSync, notice) {
     addBox.innerHTML = "";
     var ls2 = lastStaff();
     var list = sitting.filter(function (x) { return seatList(x).indexOf(id) < 0; }).sort(function (a, b) { return ((b.staff === ls2) - (a.staff === ls2)) || a.name.localeCompare(b.name); });
-    if (!list.length) return;
-    addBox.appendChild(el("h3", "sub", "이미 앉은 손님 · 좌석 추가"));
+    if (!list.length) { addBox.appendChild(el("p", "note", "지금 앉아 있는 손님이 없어요.")); return; }
+    addBox.appendChild(el("p", "note", "이미 앉은 손님을 눌러 이 자리를 추가해 주세요"));
     var pages = Math.ceil(list.length / PER); if (apage >= pages) apage = pages - 1;
     var cb = el("div", "cand");
     list.slice(apage * PER, apage * PER + PER).forEach(function (x) {
@@ -872,7 +873,6 @@ function openSeat(id, mode, noSync, notice) {
       addBox.appendChild(pg);
     }
   }
-  body.appendChild(addBox); drawAdd();
   draw(); body.appendChild(err); close(); showSeat();
 }
 var Z = 1, ZL = [1, 1.8, 2.6, 3.5];
