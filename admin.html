@@ -131,6 +131,12 @@ tr:last-child td { border-bottom:0; }
 tfoot td { font-weight:700; background:#f8f6f2; border-top:1px solid var(--line); }
 
 /* dialogs: bottom sheet on phones */
+html:has(dialog[open]), body:has(dialog[open]) { overflow:hidden; overscroll-behavior:none; }
+dialog { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; max-height:88vh !important; max-height:88dvh !important; }
+dialog .dlg-acts { position:sticky; bottom:0; z-index:5; background:var(--bg); margin:0 -16px; padding:10px 16px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); }
+dialog .dlg { padding-bottom:0; }
+dialog #sBody { padding-bottom:calc(18px + env(safe-area-inset-bottom)); }
+#eSeat::placeholder { font-size:14px; }
 dialog { border:0; padding:0; width:100%; max-width:560px; max-height:94vh; max-height:94dvh; margin:auto auto 0; border-radius:22px 22px 0 0; background:var(--bg); color:var(--ink); overflow-x:hidden; overflow-y:auto; }
 dialog::backdrop { background:rgba(23,18,15,.5); }
 @media (min-width:700px) { dialog { margin:auto; border-radius:20px; } }
@@ -271,7 +277,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
     </div>
     <div class="g2">
       <div><label for="eDate">날짜</label><input type="date" id="eDate"></div>
-      <div><label for="eSeat">좌석</label><input type="text" id="eSeat" maxlength="40" placeholder="미리 정해진 좌석이 있으면 적어주세요 (예: B1)"></div>
+      <div><label for="eSeat">좌석</label><input type="text" id="eSeat" maxlength="40" placeholder="예약석이 있으면 (예: B1)"></div>
     </div>
     <datalist id="staffs"></datalist>
     <div><label for="eStaff">담당</label><input type="text" id="eStaff" maxlength="40" placeholder="내 이름을 누르거나 새로 입력" autocomplete="off"><div id="eStaffPick"></div></div>
