@@ -131,7 +131,6 @@ tr:last-child td { border-bottom:0; }
 tfoot td { font-weight:700; background:#f8f6f2; border-top:1px solid var(--line); }
 
 /* dialogs: bottom sheet on phones */
-html:has(dialog[open]), body:has(dialog[open]) { overflow:hidden; overscroll-behavior:none; }
 dialog { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; max-height:88vh !important; max-height:88dvh !important; }
 dialog .dlg-acts { position:sticky; bottom:0; z-index:5; background:var(--bg); margin:0 -16px; padding:10px 16px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); }
 dialog .dlg { padding-bottom:0; }
@@ -568,6 +567,25 @@ function setTab(n) {
 $("tabSeat").addEventListener("click", function () { setTab("seat"); load(true); });
 $("tabList").addEventListener("click", function () { setTab("list"); load(true); });
 $("tabPerf").addEventListener("click", function () { setTab("perf"); load(true); });
+
+/* keep open sheets above the on-screen keyboard (iOS) */
+(function () {
+  var vv = window.visualViewport; if (!vv) return;
+  function fit() {
+    ["dlg", "sDlg"].forEach(function (id) {
+      var d = $(id); if (!d.open) { d.style.removeProperty("bottom"); d.style.removeProperty("top"); d.style.removeProperty("max-height"); return; }
+      var kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      d.style.setProperty("top", "auto", "important"); d.style.setProperty("bottom", kb + "px", "important");
+      d.style.setProperty("max-height", Math.max(200, vv.height - 24) + "px", "important");
+    });
+  }
+  vv.addEventListener("resize", fit); vv.addEventListener("scroll", fit);
+  document.addEventListener("focusin", function (e) {
+    var t = e.target; if (!t.closest || !t.closest("dialog")) return;
+    setTimeout(function () { fit(); try { t.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (x) {} }, 320);
+  });
+  document.addEventListener("focusout", function () { setTimeout(fit, 300); });
+})();
 
 /* ---------- edit dialog ---------- */
 function openEdit(x) {
