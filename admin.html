@@ -13,7 +13,9 @@
   --font-display:"DM Serif Display",Georgia,serif; --font-body:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif; color-scheme:light; }
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html { -webkit-text-size-adjust:100%; }
-body { touch-action:manipulation; margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.45; word-break:keep-all; overflow-wrap:break-word; }
+* { touch-action:manipulation; }
+.mapwrap, .mapwrap * { touch-action:pan-x pan-y; }
+body { overflow-x:hidden; margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:16px; line-height:1.45; word-break:keep-all; overflow-wrap:break-word; }
 [hidden] { display:none !important; }
 button, input, select, textarea { font:inherit; color:inherit; }
 button { cursor:pointer; }
@@ -45,6 +47,10 @@ button { cursor:pointer; }
 .top-in { max-width:960px; margin:0 auto; padding:2px 6px 2px 16px; display:flex; align-items:center; justify-content:space-between; min-height:48px; }
 .logo { display:flex; align-items:baseline; gap:10px; }
 .logo .sub { font-size:12px; color:var(--muted); }
+.top-r { display:flex; align-items:center; }
+#refBtn.spin svg { animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.notice { margin:0; padding:10px 12px; background:#fbeed0; color:#6b4300; border-radius:10px; font-size:14px; font-weight:500; }
 .out { border:0; background:transparent; color:var(--muted); font-size:14px; min-height:44px; padding:0 12px; border-radius:10px; }
 .tabs4 { max-width:960px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:0 12px 10px; }
 .tabs4 button { position:relative; border:1px solid var(--line); background:#fff; min-height:46px; border-radius:12px; font-weight:500; font-size:15px; color:var(--ink); padding:0 4px; white-space:nowrap; }
@@ -105,7 +111,7 @@ main { max-width:960px; margin:0 auto; padding:14px 14px calc(40px + env(safe-ar
 .rs { color:var(--muted); font-size:13.5px; margin-top:2px; display:flex; flex-wrap:wrap; gap:2px 10px; align-items:center; }
 .chip-seat { background:var(--ink); color:#fff; border-radius:7px; padding:1px 8px; font-weight:700; font-size:13px; }
 .rq { font-size:13.5px; margin-top:4px; background:#faf8f3; border-radius:8px; padding:5px 8px; color:#4a443e; }
-.stsel { -webkit-appearance:none; appearance:none; border:0; border-radius:999px; padding:9px 14px; min-height:40px; font-weight:700; font-size:14px; text-align:center; text-align-last:center; }
+.stsel { -webkit-appearance:none; appearance:none; border:0; border-radius:999px; padding:9px 14px; min-height:40px; font-weight:700; font-size:16px; text-align:center; text-align-last:center; }
 .st-requested { background:#fbeed0; color:#7a4b00; } .st-confirmed { background:#dcecfb; color:#12507f; } .st-visited { background:#dff1e0; color:#1f6b3a; }
 .st-cancelled, .st-noshow, .st-rejected { background:#ece9e5; color:#6b645d; }
 .sbadge { font-size:12.5px; font-weight:700; padding:3px 10px; border-radius:999px; }
@@ -204,7 +210,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 <div id="appView" hidden>
   <header class="top"><div class="top-in">
     <div class="logo"><p class="brand">ARZU</p><span class="sub" id="updated">라온팀 예약 관리</span></div>
-    <button class="out" id="outBtn" type="button">나가기</button>
+    <div class="top-r"><button class="icon" id="refBtn" type="button" aria-label="새로고침"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg></button><button class="out" id="outBtn" type="button">나가기</button></div>
   </div>
   <nav class="tabs4" role="tablist">
     <button role="tab" id="tabSeat" aria-selected="true" type="button">좌석 확인</button>
@@ -341,7 +347,7 @@ $("loginForm").addEventListener("submit", function (ev) {
 function enter() {
   $("loginView").hidden = true; $("appView").hidden = false; setTab("seat");
   load(); clearInterval(timer);
-  timer = setInterval(function () { if (!$("dlg").open && !$("sDlg").open) load(true); }, 30000);
+  timer = setInterval(function () { if (!$("dlg").open && !$("sDlg").open) load(true); }, 15000);
 }
 function logout(expired) {
   var t = token; token = null; clearInterval(timer);
@@ -354,12 +360,16 @@ $("outBtn").addEventListener("click", function () { logout(false); });
 
 /* ---------- data ---------- */
 function load(silent) {
+  $("refBtn").classList.add("spin");
   return rpc("admin_list", { p_token: token }).then(function (data) {
     rows = data || [];
     var d = new Date(); $("updated").textContent = "업데이트 " + pad(d.getHours()) + ":" + pad(d.getMinutes());
-    render();
-  }).catch(function (x) { if (!authFail(x) && !silent) toast("불러오지 못했어요."); });
+    render(); if (!silent) toast("최신 상태로 새로고침했어요.");
+  }).catch(function (x) { if (!authFail(x) && !silent) toast("불러오지 못했어요. 연결을 확인해 주세요."); })
+    .then(function () { setTimeout(function () { $("refBtn").classList.remove("spin"); }, 400); });
 }
+$("refBtn").addEventListener("click", function () { load(); });
+document.addEventListener("visibilitychange", function () { if (!document.hidden && token) load(true); });
 
 function fillSelect(sel, list, firstLabel) {
   var cur = sel.value; sel.innerHTML = "";
@@ -609,7 +619,13 @@ function updLabel(date) { var p = date.split("-"), d = new Date(+p[0], +p[1] - 1
 function shiftDay(n) { var v = $("mDate").value || todayStr(), p = v.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2] + n); $("mDate").value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); buildMap(); }
 $("mPrev").addEventListener("click", function () { shiftDay(-1); });
 $("mNext").addEventListener("click", function () { shiftDay(1); });
-function showSeat() { $("sDlg").showModal(); try { document.activeElement.blur(); } catch (e) {} }
+var seatCtx = null;
+function occSig(id, date) { return JSON.stringify((seatMap(date)[id] || []).map(function (x) { return x.id + x.status + (x.seat || ""); })); }
+function showSeat() {
+  if (!$("sDlg").open) $("sDlg").showModal(); try { document.activeElement.blur(); } catch (e) {}
+  var c = seatCtx; if (!c || c.noSync) return; c.noSync = true;
+  load(true).then(function () { if ($("sDlg").open && seatCtx === c && occSig(c.id, c.date) !== c.sig) openSeat(c.id, undefined, true, "방금 다른 사람이 이 자리를 바꿨어요. 최신 상태로 새로고침했어요."); });
+}
 function closeSeat() { $("sDlg").close(); }
 function saveSeat(x, newSeat, status) {
   var over = { seat: newSeat }; if (status) over.status = status;
@@ -629,8 +645,9 @@ function altSeats(id, date) {
   function score(k) { var kp = k.replace(/\d+$/, ""), kn = +((k.match(/\d+$/) || [0])[0]); return (kp === pre ? 0 : 100) + Math.abs(kn - n); }
   return SEATS.map(function (s) { return s[0]; }).filter(function (k) { return k !== id && !m[k] && !/^R/.test(k); }).sort(function (a, b) { return score(a) - score(b); }).slice(0, 6);
 }
-function openSeat(id, mode) {
+function openSeat(id, mode, noSync, notice) {
   var date = $("mDate").value || todayStr(), occ = seatMap(date)[id] || [], body = $("sBody"); body.innerHTML = "";
+  seatCtx = { id: id, date: date, sig: occSig(id, date), noSync: !!noSync };
   var seated = occ.filter(function (x) { return x.status === "visited"; }), resv = occ.filter(function (x) { return x.status !== "visited"; });
   function head(title, back) {
     var h = el("div", "dh2"), l = el("div", "dh-l");
@@ -639,8 +656,13 @@ function openSeat(id, mode) {
     var x = el("button", "icon", "✕"); x.type = "button"; x.setAttribute("aria-label", "닫기"); x.addEventListener("click", closeSeat); h.appendChild(x); return h;
   }
   body.appendChild(head("좌석 " + id + " · " + date.slice(5).replace("-", "/")));
+  if (notice) body.appendChild(el("p", "notice", notice));
   var err = el("p", "err"); err.setAttribute("role", "alert");
-  function fail(e) { if (!authFail(e)) err.textContent = "저장하지 못했어요."; }
+  function fail(e) {
+    if (authFail(e)) return;
+    if (/seat_taken/.test(e.message)) { load(true).then(function () { openSeat(id, undefined, true, "이미 다른 손님이 앉은 자리예요. 최신 상태로 새로고침했어요. 지도에서 비어 있는 자리를 골라 주세요."); }); return; }
+    err.textContent = "저장하지 못했어요. 새로고침(↻) 후 다시 해 주세요.";
+  }
   function done(msg) { closeSeat(); if (msg) toast(msg); }
   function release(x) { return saveSeat(x, seatList(x).filter(function (k) { return k !== id; }).join(", ")); }
   function close() {}
@@ -682,10 +704,10 @@ function openSeat(id, mode) {
   if (resv.length && mode !== "free") {
     var q = el("p", "ask"); q.textContent = "이 자리는 예약석이에요. 그래도 괜찮나요?"; body.appendChild(q);
     resv.forEach(function (x) { body.appendChild(resvCard(x, true)); });
-    var b1 = el("button", "btn", "그냥 고객 넣기"); b1.type = "button"; b1.addEventListener("click", function () { openSeat(id, "free"); });
+    var b1 = el("button", "btn", "그냥 고객 넣기"); b1.type = "button"; b1.addEventListener("click", function () { openSeat(id, "free", true); });
     var b2 = el("button", "btn ghost", "다른 자리 안내하기"); b2.type = "button";
     b2.addEventListener("click", function () {
-      var alts = altSeats(id, date); body.innerHTML = ""; body.appendChild(head("비어 있는 다른 자리", function () { openSeat(id); }));
+      var alts = altSeats(id, date); body.innerHTML = ""; body.appendChild(head("비어 있는 다른 자리", function () { openSeat(id, undefined, true); }));
       body.appendChild(el("p", "note", "예약이 없는 자리예요. 누르면 그 자리로 이동해요."));
       var g = el("div", "altgrid");
       alts.forEach(function (k) { var b = el("button", "btn ghost", k); b.type = "button"; b.addEventListener("click", function () { openSeat(k, "free"); }); g.appendChild(b); });
@@ -767,7 +789,24 @@ function zoomAt(ev) {
   var r = $("map").getBoundingClientRect(), fx = (ev.clientX - r.left) / r.width, fy = (ev.clientY - r.top) / r.height;
   setZoom(2.6, fx, fy);
 }
-function stepZoom(d) { var i = ZL.indexOf(Z); if (i < 0) i = 0; setZoom(ZL[Math.max(0, Math.min(ZL.length - 1, i + d))]); }
+function stepZoom(d) {
+  var n = Z; if (d > 0) { for (var i = 0; i < ZL.length; i++) if (ZL[i] > Z + 0.05) { n = ZL[i]; break; } if (n === Z) n = ZL[ZL.length - 1]; }
+  else { for (var j = ZL.length - 1; j >= 0; j--) if (ZL[j] < Z - 0.05) { n = ZL[j]; break; } if (n === Z) n = 1; }
+  setZoom(n);
+}
+(function () {
+  var pin = null, w = $("mapwrap");
+  function dist(e) { var a = e.touches[0], b = e.touches[1]; return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); }
+  w.addEventListener("touchstart", function (e) { if (e.touches.length === 2) pin = { d: dist(e), z: Z }; }, { passive: true });
+  w.addEventListener("touchmove", function (e) {
+    if (!pin || e.touches.length !== 2) return; e.preventDefault();
+    var z = Math.max(1, Math.min(4, pin.z * dist(e) / pin.d)), r = $("map").getBoundingClientRect();
+    var cx = (e.touches[0].clientX + e.touches[1].clientX) / 2, cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    setZoom(z, (cx - r.left) / r.width, (cy - r.top) / r.height);
+  }, { passive: false });
+  function end(e) { if (e.touches.length < 2) pin = null; }
+  w.addEventListener("touchend", end, { passive: true }); w.addEventListener("touchcancel", end, { passive: true });
+})();
 $("zIn").addEventListener("click", function () { stepZoom(1); });
 $("zOut").addEventListener("click", function () { stepZoom(-1); });
 $("zFit").addEventListener("click", function () { setZoom(1); });
