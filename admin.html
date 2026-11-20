@@ -280,6 +280,7 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
 /* tabs: no fill colors; selected = bold with a dark outline */
 .tabs4 button, .tabs4 button.act, .tabs4 button[aria-selected="true"], .tabs4 button.act[aria-selected="true"] { background:#fff; color:var(--ink); border:1px solid #e6e0d6; font-weight:500; box-shadow:none; }
 .tabs4 button[aria-selected="true"] { border:1.5px solid var(--ink); font-weight:700; }
+.perfnote { margin:0 2px 10px; text-align:center; font-weight:500; }
 .datebar { justify-content:center; }
 .sum { justify-content:space-between; flex-wrap:nowrap; }
 .sum span { flex:none; }
@@ -337,6 +338,8 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
     </section>
 
     <section id="perfView" hidden>
+      <div class="seg" id="perfSeg" role="group" aria-label="실적 기간"></div>
+      <p class="note perfnote" id="perfRangeNote"></p>
       <div class="tiles" id="perfTiles"></div>
       <h2 class="sec">담당별</h2>
       <div class="scroll"><table id="staffTable"></table></div>
@@ -601,15 +604,30 @@ function fillTable(t, firstHead, groups, total) {
   t.appendChild(body);
   if (groups.length > 1) { var foot = el("tfoot"), fr = el("tr"); fr.appendChild(el("td", null, "합계")); [total.n, total.vis, total.bad, won(total.sales)].forEach(function (v) { fr.appendChild(el("td", null, String(v))); }); foot.appendChild(fr); t.appendChild(foot); }
 }
+var PERF = [["today","오늘"],["week","이번 주"],["month","이번 달"],["all","전체"]], perfRange = "today";
+function perfRows() {
+  var t = todayStr(), p = t.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]), off = (d.getDay() + 6) % 7;
+  var ws = new Date(+p[0], +p[1] - 1, +p[2] - off), we = new Date(+p[0], +p[1] - 1, +p[2] - off + 6);
+  function f(x) { return x.getFullYear() + "-" + pad(x.getMonth() + 1) + "-" + pad(x.getDate()); }
+  var a = f(ws), b = f(we), m = t.slice(0, 7);
+  var label = perfRange === "today" ? (+p[1]) + "/" + (+p[2]) + " 하루" : perfRange === "week" ? a.slice(5).replace("-", "/") + " ~ " + b.slice(5).replace("-", "/") + " (월~일)" : perfRange === "month" ? (+p[1]) + "월 한 달" : "지금까지 전체";
+  $("perfRangeNote").textContent = label;
+  return rows.filter(function (x) { return perfRange === "all" || (perfRange === "today" && x.visit_date === t) || (perfRange === "week" && x.visit_date >= a && x.visit_date <= b) || (perfRange === "month" && (x.visit_date || "").slice(0, 7) === m); });
+}
+function buildPerfSeg() {
+  var box = $("perfSeg"); box.innerHTML = "";
+  PERF.forEach(function (it) { var b = el("button", null, it[1]); b.type = "button"; b.setAttribute("aria-pressed", it[0] === perfRange ? "true" : "false"); b.addEventListener("click", function () { perfRange = it[0]; buildPerfSeg(); renderTiles(); renderStaff(); }); box.appendChild(b); });
+}
+buildPerfSeg();
 function renderTiles() {
-  var box = $("perfTiles"); box.innerHTML = ""; var a = tally(rows);
+  var box = $("perfTiles"); box.innerHTML = ""; var a = tally(perfRows());
   [[a.n, "전체 예약"], [a.vis, "방문"], [a.bad, "노쇼·취소"], [won(a.sales) + "원", "금액 합계"]].forEach(function (v) {
     var t = el("div", "tile"); t.appendChild(el("b", null, String(v[0]))); t.appendChild(el("span", null, v[1])); box.appendChild(t);
   });
 }
 function renderStaff() {
-  var by = {}, keys = []; rows.forEach(function (x) { var k = x.staff || "(담당 없음)"; if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(x); });
-  fillTable($("staffTable"), "담당", keys.map(function (k) { return [k, tally(by[k])]; }).sort(function (a, b) { return b[1].vis - a[1].vis || b[1].n - a[1].n; }), tally(rows));
+  var pr = perfRows(), by = {}, keys = []; pr.forEach(function (x) { var k = x.staff || "(담당 없음)"; if (!by[k]) { by[k] = []; keys.push(k); } by[k].push(x); });
+  fillTable($("staffTable"), "담당", keys.map(function (k) { return [k, tally(by[k])]; }).sort(function (a, b) { return b[1].vis - a[1].vis || b[1].n - a[1].n; }), tally(pr));
 }
 
 /* ---------- paste form ---------- */
