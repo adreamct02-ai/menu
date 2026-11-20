@@ -221,7 +221,8 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .mvseats .note { flex:0 0 100%; margin:0; }
 .mvseats button { min-height:40px; padding:0 14px; }
 .staffpick { padding:8px 0 0; }
-.staffpick button { min-height:36px; padding:0 12px; }
+.staffpick { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.staffpick button { min-height:36px; padding:0 12px; white-space:nowrap; flex:none; }
 .chips.wrap { flex-wrap:wrap; overflow:visible; }
 .crow .go { flex:none; background:var(--ink); color:#fff; border-radius:10px; padding:9px 14px; font-weight:700; font-size:14px; }
 .crow .go.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
@@ -433,7 +434,7 @@ function lastStaff() { try { return localStorage.getItem("arzu_staff") || ""; } 
 function saveStaff(v) { try { localStorage.setItem("arzu_staff", v); } catch (e) {} }
 function staffNames() { var o = {}; rows.forEach(function (x) { if (x.staff) o[x.staff] = (o[x.staff] || 0) + 1; }); return Object.keys(o).sort(function (a, b) { return o[b] - o[a]; }); }
 function staffPick(input) {
-  var box = document.createElement("div"); box.className = "chips wrap staffpick";
+  var box = document.createElement("div"); box.className = "chips staffpick";
   function draw() {
     box.innerHTML = ""; var names = staffNames(); if (!names.length) return;
     names.forEach(function (n) { var b = document.createElement("button"); b.type = "button"; b.textContent = n; b.setAttribute("aria-pressed", input.value.trim() === n ? "true" : "false");
