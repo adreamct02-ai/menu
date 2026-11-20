@@ -137,6 +137,12 @@ dialog { overscroll-behavior:contain; -webkit-overflow-scrolling:touch; max-heig
 #dlg[open] { display:flex; flex-direction:column; }
 #editForm { display:flex; flex-direction:column; flex:1 1 auto; min-height:0; gap:0; padding-bottom:0; }
 #editForm .dh2 { flex:none; padding-bottom:10px; }
+.dh2r { display:flex; align-items:center; gap:10px; }
+.btn.save-top { min-height:44px; min-width:84px; padding:0 22px; background:var(--ink); color:#fff; border:0; border-radius:12px; font-weight:700; font-size:16px; }
+#editForm > .err { flex:none; margin:0 0 8px; font-weight:700; }
+#editForm > .err:empty { display:none; }
+#eActs[hidden] { display:none; }
+#editForm #eDel { flex:1; }
 .dscroll { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; display:grid; gap:10px; align-content:start; padding-bottom:14px; }
 #editForm .dlg-acts { position:static; flex:none; background:var(--bg); margin:0 -16px; padding:10px 16px calc(14px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); }
 dialog .dlg { padding-bottom:0; }
@@ -287,7 +293,8 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 
 <dialog id="dlg">
   <form method="dialog" class="dlg" id="editForm">
-    <div class="dh2"><h2 id="dTitle">새 예약</h2><button type="button" class="icon" id="eCancel" aria-label="닫기">✕</button></div>
+    <div class="dh2"><h2 id="dTitle">새 예약</h2><div class="dh2r"><button type="submit" class="btn save-top" id="eSave">저장</button><button type="button" class="icon" id="eCancel" aria-label="닫기">✕</button></div></div>
+    <p class="err" id="eErr" role="alert"></p>
     <div class="dscroll">
     <div><label for="eName">예약명</label><input type="text" id="eName" maxlength="60"></div>
     <div class="g2">
@@ -304,7 +311,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
     <div><label for="eReq">특이사항</label><textarea id="eReq" maxlength="500"></textarea></div>
     <div id="eOrdersBox"><label for="eOrders">주문 내용</label><textarea id="eOrders" maxlength="1000" placeholder="나중에 주문받은 뒤 적어도 돼요"></textarea></div>
     </div>
-    <div class="dlg-acts"><p class="err" id="eErr" role="alert"></p><button type="button" class="btn danger" id="eDel">삭제</button><button type="submit" class="btn big" id="eSave">저장</button></div>
+    <div class="dlg-acts" id="eActs"><button type="button" class="btn danger" id="eDel">이 예약 삭제</button></div>
   </form>
 </dialog>
 
@@ -598,7 +605,7 @@ function openEdit(x) {
   $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eStaffPick").innerHTML = ""; $("eStaffPick").appendChild(staffPick($("eStaff"))); $("eOrders").value = x ? (x.orders || "") : "";
   statusOpts($("eStatus"), x ? x.status : "confirmed"); $("eStatusBox").hidden = !x; $("eOrdersBox").hidden = !x;
   
-  $("eDel").hidden = !x; $("dlg").showModal(); try { document.activeElement.blur(); } catch (e) {}
+  $("eDel").hidden = !x; $("eActs").hidden = !x; $("dlg").showModal(); try { document.activeElement.blur(); } catch (e) {}
 }
 $("newBtn").addEventListener("click", function () { openEdit(null); });
 $("eCancel").addEventListener("click", function () { $("dlg").close(); });
