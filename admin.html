@@ -243,79 +243,34 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .toast { position:fixed; left:50%; bottom:calc(30px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--ink); color:#fff; padding:11px 18px; border-radius:999px; font-size:14.5px; z-index:99; max-width:90vw; text-align:center; }
 @media (min-width:900px) { .tiles { grid-template-columns:repeat(4,1fr); } .rc { padding:14px 16px; } }
 
-/* ================= Night lounge theme (visual only) =================
-   Night #14100e · Velvet #1e1816 · Ivory #f1e9dd · Brass #c9a45e · Wine #b3394a */
-:root { --bg:#14100e; --card:#1e1816; --raise:#271f1c; --ink:#f1e9dd; --muted:#a39689; --line:#372d29; --accent:#b3394a; --brass:#c9a45e; --on-brass:#1a1208;
-  --amber:#e0b04a; --blue:#6aa7e6; --serif:"Noto Serif KR","DM Serif Display",Georgia,serif; color-scheme:dark; }
-body { background:radial-gradient(130% 55% at 50% -8%, #2b1a1b 0%, var(--bg) 62%) fixed, var(--bg); }
-:focus-visible { outline-color:var(--brass); }
-::placeholder { color:#74695f; }
-.brand { color:var(--ink); letter-spacing:.16em; }
-.logo .sub { color:var(--muted); }
-.err { color:#f09aa2; }
-.note, .hint { color:var(--muted); }
-
-/* surfaces */
-.top { background:rgba(20,16,14,.88); border-bottom:1px solid #2a211e; }
-.login input, .datepick, .sum span, .live button, .rc, .tile, .scroll, .res, .crow, .askbox, .cand > button, .pill, .tabs4 button, .chips button, #fQ, .pager button, .btn.ghost, .btn.danger, .dlg input, .dlg select, .dlg textarea, .sfields input, .sfields textarea, .crow .go.ghost { background:var(--card); color:var(--ink); border-color:var(--line); }
-.rc, .tile, .res, .live button, .scroll, .askbox { border-radius:18px; box-shadow:0 10px 26px -16px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.035); }
-.dlg input, .dlg select, .dlg textarea, .sfields input, .sfields textarea, #fQ, .login input { border-radius:14px; }
-.dlg input:focus, .dlg select:focus, .dlg textarea:focus, .sfields input:focus, .sfields textarea:focus, #fQ:focus, .login input:focus { border-color:var(--brass); outline:none; box-shadow:0 0 0 3px rgba(201,164,94,.18); }
-.mapwrap { background:#1a1514; border:1px solid #4a3d33; border-radius:20px; box-shadow:0 14px 34px -18px rgba(0,0,0,.9); }
-.seg { background:var(--raise); }
-.seg button[aria-pressed="true"] { background:var(--card); color:var(--brass); box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 2px 8px rgba(0,0,0,.4); }
-th, tfoot td { background:var(--raise); color:var(--muted); }
-tfoot td { color:var(--ink); }
-.rq { background:var(--raise); color:#d8cdbf; }
-.live b.sc { background:var(--raise); color:var(--brass); }
-.live button.v { border-left-color:var(--amber); } .live button.p { border-left-color:var(--blue); }
-.datepick, .tile b, .sec, .dlg h2, #sBody h2, .login h1 { font-family:var(--serif); }
-.datepick { font-weight:700; letter-spacing:.01em; border-radius:16px; }
-.tile b { font-weight:700; color:var(--ink); }
-.tile span { letter-spacing:.01em; }
-.dlg h2 { font-size:20px; letter-spacing:.01em; }
-.dlg label, .sfields label { color:#cfc4b6; font-weight:500; letter-spacing:.01em; }
-.rn, .who { letter-spacing:.005em; }
-
-/* actions */
-.btn { background:var(--brass); border-color:var(--brass); color:var(--on-brass); border-radius:14px; letter-spacing:.01em; }
-.btn.ghost { background:var(--card); color:var(--ink); }
-.btn.danger { color:#f09aa2; border-color:#5a2a30; background:rgba(179,57,74,.08); }
-.btn.save-top { background:var(--brass); color:var(--on-brass); border-radius:14px; }
-.out { color:var(--muted); }
-.icon:active { background:rgba(255,255,255,.08); }
-.tabs4 button { border-radius:14px; color:#cfc4b6; }
-.tabs4 button[aria-selected="true"] { background:var(--brass); border-color:var(--brass); color:var(--on-brass); }
-.tabs4 button.act { background:var(--accent); border-color:var(--accent); color:#fff8f0; }
-.tabs4 button.act[aria-selected="true"] { background:var(--accent); border-color:var(--brass); color:#fff8f0; }
-.nb { background:var(--brass); color:var(--on-brass); border-color:var(--bg); }
-.chips button { color:#d8cdbf; }
-.chips button[aria-pressed="true"], .pager button[aria-pressed="true"] { background:var(--brass); border-color:var(--brass); color:var(--on-brass); }
-.chips button.act { border-color:#76675b; background:transparent; color:var(--ink); }
-.chips button.act[aria-pressed="true"] { background:var(--brass); border-color:var(--brass); color:var(--on-brass); }
-.crow .go { background:var(--brass); color:var(--on-brass); }
-.crow .go.ghost { color:var(--ink); }
-.chip-seat { background:var(--raise); color:var(--brass); border:1px solid #4a3d33; }
-.dh em { color:#e58b95; }
-.rc.new { border-left-color:var(--accent); }
-.sum span { color:var(--ink); }
-.toast { background:var(--ink); color:#1a1208; box-shadow:0 12px 30px -10px rgba(0,0,0,.8); }
-.notice { background:rgba(201,164,94,.13); color:#e8cf9a; border:1px solid rgba(201,164,94,.28); }
-.zctl button { background:rgba(30,24,22,.92); color:var(--ink); box-shadow:0 4px 14px rgba(0,0,0,.5); }
-
-/* status pills */
-.st-requested { background:rgba(224,176,74,.16); color:#f0c874; }
-.st-confirmed { background:rgba(106,167,230,.16); color:#92c1f3; }
-.st-visited { background:rgba(106,190,130,.16); color:#92d8a6; }
-.st-left { background:rgba(150,160,215,.16); color:#b0b9ea; }
-.st-cancelled, .st-noshow, .st-rejected { background:rgba(255,255,255,.07); color:#a99d92; }
-.stsel option { background:var(--card); color:var(--ink); }
-
-/* sheets / forms */
-dialog, #dlg, #sDlg { background:var(--bg); color:var(--ink); }
-#editForm .dh2, #sDlg .dh2, .dlg-acts { background:rgba(20,16,14,.94); border-color:#2a211e; }
-dialog::backdrop { background:rgba(0,0,0,.6); }
-details summary { color:var(--ink); }
+/* ================= Ivory & brass theme (visual only) ================= */
+:root { --serif:"Noto Serif KR","DM Serif Display",Georgia,serif; --brass:#9a7733; }
+body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%) fixed, var(--bg); }
+.brand { letter-spacing:.16em; }
+.top { background:rgba(245,242,236,.9); border-bottom:1px solid #e3ddd2; }
+.rc, .tile, .res, .live button, .scroll, .askbox { border-radius:18px; border-color:#e8e2d8; box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 8px 22px -16px rgba(60,40,20,.35); }
+.datepick, .sum span, .chips button, .tabs4 button, .pill, .pager button, .btn, .crow, .cand > button { border-color:#e6e0d6; }
+.datepick { border-radius:16px; font-family:var(--serif); letter-spacing:.01em; box-shadow:0 8px 22px -18px rgba(60,40,20,.4); }
+.tile b, .sec, .dlg h2, #sBody h2, .login h1 { font-family:var(--serif); }
+.tile b { font-weight:700; }
+.dlg h2 { font-size:20px; }
+.dlg input, .dlg select, .dlg textarea, .sfields input, .sfields textarea, #fQ, .login input { border-radius:14px; border-color:#e2dbcf; }
+.dlg input:focus, .dlg select:focus, .dlg textarea:focus, .sfields input:focus, .sfields textarea:focus, #fQ:focus, .login input:focus { border-color:var(--brass); outline:none; box-shadow:0 0 0 3px rgba(154,119,51,.16); }
+.dlg label, .sfields label { color:#4a423a; font-weight:500; }
+.btn, .btn.save-top, .tabs4 button { border-radius:14px; }
+.tabs4 button[aria-selected="true"], .chips button[aria-pressed="true"], .pager button[aria-pressed="true"] { box-shadow:0 6px 14px -8px rgba(23,18,15,.55); }
+.tabs4 button.act { box-shadow:0 6px 14px -8px rgba(122,16,22,.6); }
+.mapwrap { border-radius:20px; border:1px solid #d9d1c4; box-shadow:0 14px 30px -18px rgba(60,40,20,.55); }
+.seg { background:#ebe6dd; }
+.chip-seat { background:#1b1512; color:#f3dfae; }
+.live b.sc { color:var(--brass); background:#f3efe7; }
+.toast { box-shadow:0 12px 28px -10px rgba(0,0,0,.45); }
+.pickbtn { border-color:#b9ad9c; color:var(--ink); }
+.pickbtn .car { color:var(--brass); }
+.pickbtn[aria-expanded="true"] { border-color:var(--brass); }
+.picklist button { background:#fff; border-color:#e2dbcf; color:var(--ink); }
+.picklist button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
+.chips button.act { border-color:#b9ad9c; }
 </style>
 </head>
 <body>
