@@ -188,6 +188,11 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .pager button { min-width:44px; min-height:44px; border:1px solid var(--line); background:#fff; border-radius:12px; font-weight:600; font-size:16px; }
 .pager button[aria-pressed="true"] { background:var(--ink); border-color:var(--ink); color:#fff; }
 .pager button:disabled { opacity:.35; }
+.chipwrap { display:grid; gap:4px; min-width:0; }
+.staffrow { flex-wrap:nowrap; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
+.staffrow button { white-space:nowrap; }
+.fixedrow { padding:0 0 8px; }
+.fixedrow button { white-space:nowrap; }
 .askbox { margin-top:10px; display:grid; gap:8px; padding:12px; background:#fff; border:1px solid var(--line); border-radius:14px; }
 .askbox .note { margin:0; font-weight:600; }
 .mvseats { margin-top:10px; }
@@ -796,18 +801,18 @@ function openSeat(id, mode, noSync, notice) {
   waiting.forEach(function (x) { var k = x.staff || "_none"; if (!cnt[k]) { cnt[k] = 0; if (k !== "_none") names.push(k); } cnt[k]++; });
   names.sort(function (a, b) { return cnt[b] - cnt[a]; });
   var ls = lastStaff(), sel = names.indexOf(ls) >= 0 ? ls : (names.length === 1 && !cnt._none ? names[0] : (!names.length && !cnt._none ? "walk" : ""));
-  var chipBox = el("div", "chips wrap"), area = el("div", "sfields"); body.appendChild(chipBox); body.appendChild(area);
+  var chipBox = el("div", "chipwrap"), area = el("div", "sfields"); body.appendChild(chipBox); body.appendChild(area);
   function seatNow(x, extra) {
     var cur = extra ? seatList(x).concat([id]) : [id];
     return saveSeat(x, cur.join(", "), x.status === "visited" ? null : "visited").then(function () { done(id + "에 " + x.name + " 님을 앉혔어요."); }).catch(fail);
   }
   var page = 0, PER = 3;
   function draw() {
-    chipBox.innerHTML = "";
+    chipBox.innerHTML = ""; var sr = el("div", "chips staffrow"), fr2 = el("div", "chips wrap fixedrow"); chipBox.appendChild(sr); chipBox.appendChild(fr2);
     var opts = names.map(function (n) { return [n, n + " (" + cnt[n] + ")"]; });
     if (cnt._none) opts.push(["_none", "담당 없음 (" + cnt._none + ")"]);
     opts.push(["walk", "예약 없이 온 손님"]); if (sitting.length) opts.push(["add", "좌석 추가"]);
-    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; page = 0; if (sel !== "walk" && sel !== "_none" && sel !== "add") saveStaff(sel); draw(); }); chipBox.appendChild(b); });
+    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; page = 0; if (sel !== "walk" && sel !== "_none" && sel !== "add") saveStaff(sel); draw(); }); (o[0] === "walk" || o[0] === "add" ? fr2 : sr).appendChild(b); });
     area.innerHTML = ""; err.textContent = "";
     if (!sel) { area.appendChild(el("p", "note", "위에서 내 이름을 누르면 내 예약 손님이 떠요.")); return; }
     if (sel === "add") { apage = 0; area.appendChild(addBox); drawAdd(); return; }
