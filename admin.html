@@ -100,6 +100,23 @@ dialog::backdrop { background:rgba(23,18,15,.55); }
 .cand { display:grid; gap:6px; max-height:38vh; overflow:auto; }
 .cand button { text-align:left; padding:10px; border:1px solid var(--line); border-radius:10px; background:#fff; cursor:pointer; }
 .cand button small { color:var(--muted); display:block; }
+
+/* mobile overflow fixes */
+.dlg input, .dlg select, .dlg textarea, .filters select, .filters input, .mapbar input, .login input, .res-bot select, .cand input { font-size:16px; }
+.g2 > *, .dlg > *, .filters > *, .mapbar > * { min-width:0; }
+.dlg input, .dlg select, .dlg textarea, .filters select, .filters input, .mapbar input { max-width:100%; min-width:0; }
+input[type=date], input[type=time] { -webkit-appearance:none; appearance:none; min-height:44px; text-align:left; display:block; }
+input[type=date]::-webkit-date-and-time-value { text-align:left; }
+.dlg input, .dlg select { min-height:44px; }
+dialog { overflow-x:hidden; overflow-y:auto; max-height:90vh; max-height:90dvh; margin:auto; }
+.dlg { box-sizing:border-box; width:100%; }
+.dlg-acts { gap:8px; }
+.dlg-acts .btn { min-height:44px; }
+select { -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%236b645d' stroke-width='2'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:32px !important; }
+.res select { padding-right:32px; }
+.res-top > div { min-width:0; }
+.who, .meta { overflow-wrap:anywhere; }
+@media (max-width:560px) { .dlg { padding:14px; } .g2 { gap:8px; } .bar-in { padding:10px; } main { padding:12px 10px 60px; } .toast { max-width:90vw; text-align:center; } }
 @media (max-width:560px) { .cards { grid-template-columns:repeat(2,1fr); } }
 </style>
 </head>
