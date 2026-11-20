@@ -317,7 +317,7 @@ $("loginForm").addEventListener("submit", function (ev) {
   var pw = $("pw").value; if (!pw) return;
   var b = $("loginBtn"); b.disabled = true; $("loginErr").textContent = "";
   rpc("admin_login", { p_pw: pw }).then(function (t) {
-    token = t; try { sessionStorage.setItem("arzu_admin", t); } catch (e) {}
+    token = t; try { localStorage.setItem("arzu_admin", t); } catch (e) {}
     $("pw").value = ""; enter();
   }).catch(function (x) {
     $("loginErr").textContent = /locked/.test(x.message) ? "시도가 너무 많아요. 15분 뒤에 다시 해주세요." : (/bad_password/.test(x.message) ? "비밀번호가 맞지 않아요." : "연결에 실패했어요. 잠시 뒤 다시 해주세요. (" + String(x.message).slice(0, 80) + ")");
@@ -331,7 +331,7 @@ function enter() {
 }
 function logout(expired) {
   var t = token; token = null; clearInterval(timer);
-  try { sessionStorage.removeItem("arzu_admin"); } catch (e) {}
+  try { localStorage.removeItem("arzu_admin"); } catch (e) {}
   if (t && !expired) rpc("admin_logout", { p_token: t }).catch(function () {});
   $("appView").hidden = true; $("loginView").hidden = false;
   $("loginErr").textContent = expired ? "시간이 지나 로그아웃됐어요. 다시 들어와 주세요." : "";
@@ -794,7 +794,7 @@ $("csvBtn").addEventListener("click", function () {
 });
 
 /* ---------- boot ---------- */
-(function () { var t = null; try { t = sessionStorage.getItem("arzu_admin"); } catch (e) {} if (t) { token = t; enter(); } })();
+(function () { var t = null; try { t = localStorage.getItem("arzu_admin"); } catch (e) {} if (t) { token = t; enter(); } })();
 </script>
 </body>
 </html>
