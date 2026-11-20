@@ -191,8 +191,12 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
 .chipwrap { display:grid; gap:4px; min-width:0; }
 .staffrow { flex-wrap:nowrap; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
 .staffrow button { white-space:nowrap; }
-.fixedrow { padding:0 0 8px; }
-.fixedrow button { white-space:nowrap; }
+.fixedrow { padding:10px 0 8px; margin-top:6px; border-top:1px solid var(--line); gap:10px; }
+.chips button.act { white-space:nowrap; border:1.5px dashed #a79e94; background:transparent; border-radius:12px; font-weight:600; color:var(--ink); }
+.chips button.act::before { margin-right:6px; font-weight:700; }
+.chips button.act-walk::before { content:"＋"; }
+.chips button.act-add::before { content:"⇢"; }
+.chips button.act[aria-pressed="true"] { border-style:solid; background:var(--ink); color:#fff; }
 .askbox { margin-top:10px; display:grid; gap:8px; padding:12px; background:#fff; border:1px solid var(--line); border-radius:14px; }
 .askbox .note { margin:0; font-weight:600; }
 .mvseats { margin-top:10px; }
@@ -793,7 +797,7 @@ function openSeat(id, mode, noSync, notice) {
     var opts = names.map(function (n) { return [n, n + " (" + cnt[n] + ")"]; });
     if (cnt._none) opts.push(["_none", "담당 없음 (" + cnt._none + ")"]);
     opts.push(["walk", "예약 없이 온 손님"]); if (sitting.length) opts.push(["add", "좌석 추가"]);
-    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; page = 0; if (sel !== "walk" && sel !== "_none" && sel !== "add") saveStaff(sel); draw(); }); (o[0] === "walk" || o[0] === "add" ? fr2 : sr).appendChild(b); });
+    opts.forEach(function (o) { var b = el("button", null, o[1]); b.type = "button"; b.setAttribute("aria-pressed", o[0] === sel ? "true" : "false"); b.addEventListener("click", function () { sel = o[0]; page = 0; if (sel !== "walk" && sel !== "_none" && sel !== "add") saveStaff(sel); draw(); }); if (o[0] === "walk" || o[0] === "add") { b.className = "act act-" + o[0]; fr2.appendChild(b); } else sr.appendChild(b); });
     area.innerHTML = ""; err.textContent = "";
     if (!sel) { area.appendChild(el("p", "note", "위에서 내 이름을 누르면 내 예약 손님이 떠요.")); return; }
     if (sel === "add") { apage = 0; area.appendChild(addBox); drawAdd(); return; }
