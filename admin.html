@@ -333,6 +333,10 @@ function rpc(fn, args) {
       if (!r.ok) throw new Error((j && j.message) || String(txt));
       return j;
     });
+  }).then(function (j) {
+    /* after any save/delete, pull the latest from the server right away */
+    if ((fn === "admin_save" || fn === "admin_delete") && typeof load === "function") setTimeout(function () { load(true); }, 150);
+    return j;
   });
 }
 function authFail(x) {
