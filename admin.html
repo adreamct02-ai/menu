@@ -275,7 +275,7 @@ details summary { min-height:36px; display:flex; align-items:center; font-weight
     <div><label for="eName">예약명</label><input type="text" id="eName" maxlength="60"></div>
     <div class="g2">
       <div><label for="eParty">인원</label><input type="number" id="eParty" min="1" max="100" inputmode="numeric"></div>
-      <div><label for="eSales">금액(원)</label><input type="number" id="eSales" min="0" inputmode="numeric" placeholder="나중에 넣어도 돼요"></div>
+      <div><label for="eSales">금액(원)</label><input type="text" id="eSales" inputmode="numeric" autocomplete="off" placeholder="나중에 넣어도 돼요"></div>
     </div>
     <div class="g2">
       <div><label for="eDate">날짜</label><input type="date" id="eDate"></div>
@@ -553,7 +553,7 @@ $("pasteGo").addEventListener("click", function () {
   if (r.date) { $("eDate").value = r.date; got++; }
   if (r.name) { $("eName").value = r.name; got++; } if (r.staff) { $("eStaff").value = r.staff; got++; }
   if (r.party) { $("eParty").value = r.party; got++; } if (r.seat) { $("eSeat").value = r.seat; got++; }
-  if (r.sales != null) { $("eSales").value = r.sales; got++; } if (r.request) { $("eReq").value = r.request; got++; }
+  if (r.sales != null) { $("eSales").value = commaFmt(r.sales); got++; } if (r.request) { $("eReq").value = r.request; got++; }
   $("eErr").textContent = got ? "" : "양식을 읽지 못했어요. '1. 날짜 / 시간 : ...' 모양인지 확인해 주세요.";
   if (got) { $("pasteBox").open = false; toast("채웠어요. 확인하고 저장하세요."); }
 });
@@ -568,6 +568,11 @@ $("tabSeat").addEventListener("click", function () { setTab("seat"); load(true);
 $("tabList").addEventListener("click", function () { setTab("list"); load(true); });
 $("tabPerf").addEventListener("click", function () { setTab("perf"); load(true); });
 
+/* amount fields: type digits, commas appear by themselves */
+function commaFmt(v) { var d = String(v == null ? "" : v).replace(/\D/g, "").replace(/^0+(?=\d)/, ""); return d.replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function rawNum(v) { return String(v || "").replace(/\D/g, ""); }
+function moneyInput(inp) { inp.type = "text"; inp.inputMode = "numeric"; inp.autocomplete = "off"; inp.value = commaFmt(inp.value); inp.addEventListener("input", function () { inp.value = commaFmt(inp.value); }); return inp; }
+moneyInput($("eSales"));
 /* keep open sheets above the on-screen keyboard (iOS) */
 (function () {
   var vv = window.visualViewport; if (!vv) return;
@@ -595,7 +600,7 @@ function openEdit(x) {
   $("eDate").value = x ? x.visit_date : todayStr();
   $("eParty").value = x ? x.party_size : 2; $("eSeat").value = x ? (x.seat || "") : "";
   $("eReq").value = x ? (x.request || "") : "";
-  $("eSales").value = x && x.sales_amount != null ? x.sales_amount : "";
+  $("eSales").value = x && x.sales_amount != null ? commaFmt(x.sales_amount) : "";
   $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eStaffPick").innerHTML = ""; $("eStaffPick").appendChild(staffPick($("eStaff"))); $("eOrders").value = x ? (x.orders || "") : "";
   statusOpts($("eStatus"), x ? x.status : "confirmed"); $("eStatusBox").hidden = !x; $("eOrdersBox").hidden = !x;
   $("pasteTxt").value = ""; $("pasteBox").hidden = !!x; $("pasteBox").open = false;
@@ -610,7 +615,7 @@ $("editForm").addEventListener("submit", function (ev) {
   if (!name) { bad("예약명을 적어 주세요.", "eName"); return; }
   if (!date) { bad("날짜를 골라 주세요.", "eDate"); return; }
   if (!(party >= 1 && party <= 100)) { bad("인원은 1~100명으로 적어 주세요.", "eParty"); return; }
-  var over = { name: name, party_size: String(party), visit_date: date, seat: $("eSeat").value.trim(), request: $("eReq").value.trim(), sales_amount: $("eSales").value, staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim() };
+  var over = { name: name, party_size: String(party), visit_date: date, seat: $("eSeat").value.trim(), request: $("eReq").value.trim(), sales_amount: rawNum($("eSales").value), staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim() };
   var p;
   if (editing) { over.status = $("eStatus").value; p = payloadOf(editing, over); }
   else { p = { status: "confirmed", contact_type: "none", contact: "", visit_time: "", channel: "", revisit_count: "0", memo: "" }; for (var k in over) p[k] = over[k]; }
@@ -723,12 +728,12 @@ function openSeat(id, mode, noSync, notice) {
       var f = el("div", "sfields");
       var l1 = el("label", null, "담당"), i1 = document.createElement("input"); i1.maxLength = 40; i1.value = x.staff || ""; l1.appendChild(i1); l1.appendChild(staffPick(i1));
       var l2 = el("label", null, "주문 내용 (나중에 적어도 돼요)"), i2 = document.createElement("textarea"); i2.maxLength = 1000; i2.value = x.orders || ""; l2.appendChild(i2);
-      var l3 = el("label", null, "금액(원)"), i3 = document.createElement("input"); i3.type = "number"; i3.min = 0; i3.inputMode = "numeric"; i3.value = x.sales_amount == null ? "" : x.sales_amount; l3.appendChild(i3);
+      var l3 = el("label", null, "금액(원)"), i3 = document.createElement("input"); i3.value = x.sales_amount == null ? "" : x.sales_amount; moneyInput(i3); l3.appendChild(i3);
       f.appendChild(l1); f.appendChild(l2); f.appendChild(l3); c.appendChild(f);
       var sv = el("button", "btn", "저장"); sv.type = "button";
       sv.addEventListener("click", function () {
         if (i1.value.trim()) saveStaff(i1.value.trim());
-        rpc("admin_save", { p_token: token, p: payloadOf(x, { staff: i1.value.trim(), orders: i2.value.trim(), sales_amount: i3.value }) }).then(function (row) { Object.keys(row).forEach(function (k) { x[k] = row[k]; }); render(); done("저장했어요."); }).catch(fail);
+        rpc("admin_save", { p_token: token, p: payloadOf(x, { staff: i1.value.trim(), orders: i2.value.trim(), sales_amount: rawNum(i3.value) }) }).then(function (row) { Object.keys(row).forEach(function (k) { x[k] = row[k]; }); render(); done("저장했어요."); }).catch(fail);
       });
       var fr = el("button", "btn ghost", "자리 비우기"); fr.type = "button"; fr.addEventListener("click", function () { release(x).then(function () { done(); }).catch(fail); });
       var ed = el("button", "btn ghost", "전체 수정"); ed.type = "button"; ed.addEventListener("click", function () { closeSeat(); openEdit(x); });
