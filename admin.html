@@ -280,6 +280,8 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
 /* tabs: no fill colors; selected = bold with a dark outline */
 .tabs4 button, .tabs4 button.act, .tabs4 button[aria-selected="true"], .tabs4 button.act[aria-selected="true"] { background:#fff; color:var(--ink); border:1px solid #e6e0d6; font-weight:500; box-shadow:none; }
 .tabs4 button[aria-selected="true"] { border:1.5px solid var(--ink); font-weight:700; }
+.perfnote2 { text-align:center; margin:8px 2px 0; }
+.dl .btn { min-width:220px; }
 .perfnote { margin:0 2px 10px; text-align:center; font-weight:500; }
 .datebar { justify-content:center; }
 .sum { justify-content:space-between; flex-wrap:nowrap; }
@@ -334,7 +336,6 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
       <div class="chips" id="fStaff" role="group" aria-label="담당" hidden></div>
       <input type="search" id="fQ" placeholder="예약명 · 연락처 · 담당 · 자리 검색" aria-label="검색">
       <div class="list" id="list"></div>
-      <div class="dl"><button class="btn ghost" id="csvBtn" type="button">지금 보이는 목록 엑셀로 받기</button></div>
     </section>
 
     <section id="perfView" hidden>
@@ -344,6 +345,8 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
       <h2 class="sec">담당별</h2>
       <div class="scroll"><table id="staffTable"></table></div>
       <p class="note">금액은 예약이나 좌석을 눌러 직접 입력한 값이에요.</p>
+      <div class="dl"><button class="btn" id="xlsBtn" type="button">실적 엑셀로 받기</button></div>
+      <p class="note perfnote2">기간 선택과 상관없이 전체 기록이 담겨요. 담당자·날짜·주·월·요일별 표와 금액이 빠진 예약까지 들어 있어요.</p>
     </section>
   </main>
 
@@ -1016,15 +1019,160 @@ $("mDate").value = todayStr();
 $("mDate").addEventListener("change", buildMap);
 $("mToday").addEventListener("click", function () { $("mDate").value = todayStr(); buildMap(); });
 
-/* ---------- csv ---------- */
-$("csvBtn").addEventListener("click", function () {
-  var head = ["예약번호","날짜","예약명","인원","상태","좌석","담당","금액","특이사항","주문","경로"];
-  function q(v) { v = v == null ? "" : String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; }
-  var lines = [head.map(q).join(",")];
-  filtered().forEach(function (x) { lines.push([x.code, x.visit_date, x.name, x.party_size, labelOf(STATUS, x.status), x.seat, x.staff, x.sales_amount, x.request, x.orders, SRC[x.source]].map(q).join(",")); });
-  var blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
-  var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "arzu-reservations-" + todayStr() + ".csv";
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+/* ---------- performance Excel (styled, multi-sheet) ---------- */
+function buildPerfWorkbook(ExcelJS, list) {
+  var INK = "FF1B1512", IVORY = "FFF1E9DD", SAND = "FFEADBB8", PAPER = "FFFAF7F1", MUTE = "FF8A8176", LINE = "FFE6E0D6", BRASS = "FFB08D45", WINE = "FFB3394A";
+  var FN = "Malgun Gothic", MON = '#,##0;-#,##0;"-"', PCT = '0%;-0%;"-"';
+  var thin = { style: "thin", color: { argb: LINE } }, med = { style: "medium", color: { argb: INK } }, band = { style: "thin", color: { argb: "FFCFC5B6" } };
+  function font(o) { o = o || {}; return { name: FN, size: o.size || 10, bold: !!o.bold, italic: !!o.italic, color: { argb: o.color || INK } }; }
+  function fill(c) { return { type: "pattern", pattern: "solid", fgColor: { argb: c } }; }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function ds(d) { return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+  function parse(s) { var p = String(s).split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  var DOW = ["월", "화", "수", "목", "금", "토", "일"];
+  function dowOf(s) { return (parse(s).getDay() + 6) % 7; }
+  function weekStart(s) { var d = parse(s); d.setDate(d.getDate() - dowOf(s)); return ds(d); }
+  function stLabel(s) { return { requested: "신규", confirmed: "예약", visited: "방문", left: "나감", noshow: "노쇼", cancelled: "취소", rejected: "취소" }[s] || s; }
+  var rows = list.slice().sort(function (a, b) { return a.visit_date < b.visit_date ? -1 : a.visit_date > b.visit_date ? 1 : 0; }).map(function (x) {
+    return { date: x.visit_date, name: x.name || "", staff: x.staff || "(담당 없음)", party: +x.party_size || 0, seat: x.seat || "", st: x.status, stl: stLabel(x.status), amt: x.sales_amount == null || x.sales_amount === "" ? null : +x.sales_amount };
+  });
+  function isVis(r) { return r.st === "visited" || r.st === "left"; }
+  function isBad(r) { return r.st === "noshow" || r.st === "cancelled" || r.st === "rejected"; }
+  function agg(rs) { var a = { n: rs.length, vis: 0, bad: 0, guests: 0, amt: 0 }; rs.forEach(function (r) { if (isVis(r)) { a.vis++; a.guests += r.party; } if (isBad(r)) a.bad++; a.amt += r.amt || 0; }); a.rate = a.n ? a.bad / a.n : 0; a.avg = a.vis ? a.amt / a.vis : 0; return a; }
+  var staffs = {}; rows.forEach(function (r) { staffs[r.staff] = (staffs[r.staff] || 0) + (r.amt || 0); });
+  var staffOrder = Object.keys(staffs).sort(function (a, b) { return staffs[b] - staffs[a] || (a < b ? -1 : 1); });
+  var wb = new ExcelJS.Workbook(); wb.creator = "ARZU"; wb.created = new Date();
+  function sheet(name, widths, tab) {
+    var ws = wb.addWorksheet(name, { properties: { tabColor: { argb: tab } }, views: [{ showGridLines: false, zoomScale: 110 }] });
+    ws.getColumn(1).width = 2.5; widths.forEach(function (w, i) { ws.getColumn(i + 2).width = w; }); return ws;
+  }
+  function title(ws, t, note) { ws.getCell("B2").value = t; ws.getCell("B2").font = font({ size: 18, bold: true }); ws.getRow(2).height = 30; ws.getCell("B3").value = note || ""; ws.getCell("B3").font = font({ size: 9, color: MUTE }); }
+  function header(ws, r, cols) {
+    ws.getRow(r).height = 26;
+    cols.forEach(function (t, i) { var c = ws.getCell(r, i + 2); c.value = t; c.font = font({ bold: true, color: IVORY }); c.fill = fill(INK); c.alignment = { horizontal: i < (cols.length > 8 && cols[1] === "담당" ? 2 : 1) ? "left" : "right", vertical: "middle", indent: i < 2 ? 1 : 0 }; });
+  }
+  var NH = ["예약", "방문", "노쇼·취소", "노쇼·취소율", "손님 수(명)", "금액(원)", "방문당 평균(원)"];
+  function nums(ws, r, c0, a, o) {
+    o = o || {};
+    [a.n, a.vis, a.bad, a.rate, a.guests, a.amt, a.avg].forEach(function (v, i) {
+      var c = ws.getCell(r, c0 + i); c.value = v; c.numFmt = i === 3 ? PCT : MON; c.font = font({ bold: o.bold }); c.alignment = { horizontal: "right" };
+      if (o.fill) c.fill = fill(o.fill); c.border = { bottom: o.bottom || thin };
+    });
+  }
+  function totalRow(ws, r, labels, a, c0) {
+    labels.forEach(function (t, i) { var c = ws.getCell(r, 2 + i); c.value = t; c.font = font({ bold: true, size: 11 }); c.fill = fill(SAND); c.border = { bottom: med }; c.alignment = { horizontal: "left", indent: 1 }; });
+    nums(ws, r, c0, a, { bold: true, fill: SAND, bottom: med }); ws.getRow(r).height = 24;
+  }
+  function bars(ws, ref) { ws.addConditionalFormatting({ ref: ref, rules: [{ type: "dataBar", priority: 1, cfvo: [{ type: "num", value: 0 }, { type: "max" }], color: { argb: "FFD8BF84" }, gradient: true }] }); }
+  function rateRed(ws, ref) { ws.addConditionalFormatting({ ref: ref, rules: [{ type: "cellIs", operator: "greaterThanOrEqual", priority: 2, formulae: [0.25], style: { font: { bold: true, color: { argb: WINE } } } }] }); }
+  var all = agg(rows);
+  // ---- 요약
+  var s1 = sheet("요약", [22, 22, 22, 22], INK);
+  s1.getCell("B2").value = "ARZU 라온팀 실적"; s1.getCell("B2").font = font({ size: 22, bold: true }); s1.getRow(2).height = 36;
+  s1.getCell("B3").value = rows.length ? "기간  " + rows[0].date + "  ~  " + rows[rows.length - 1].date : "기록이 아직 없어요"; s1.getCell("B3").font = font({ color: MUTE });
+  [["전체 예약", all.n, MON], ["방문 (나감 포함)", all.vis, MON], ["노쇼·취소율", all.rate, "0.0%"], ["금액 합계(원)", all.amt, MON]].forEach(function (t, i) {
+    var a = s1.getCell(5, 2 + i), v = s1.getCell(6, 2 + i);
+    a.value = t[0]; a.font = font({ color: MUTE }); a.fill = fill(PAPER); a.border = { top: { style: "medium", color: { argb: BRASS } } }; a.alignment = { horizontal: "left", vertical: "bottom", indent: 1 };
+    v.value = t[1]; v.numFmt = t[2]; v.font = font({ size: 20, bold: true }); v.fill = fill(PAPER); v.alignment = { horizontal: "left", vertical: "middle", indent: 1 };
+  });
+  s1.getRow(5).height = 22; s1.getRow(6).height = 38;
+  var missing = rows.filter(function (r) { return isVis(r) && r.amt == null; });
+  s1.getCell("B8").value = missing.length ? "확인이 필요해요: 금액이 빠진 방문 " + missing.length + "건 → '금액 미입력' 시트" : "금액이 빠진 방문 예약이 없어요.";
+  s1.getCell("B8").font = font({ bold: true, color: missing.length ? WINE : MUTE });
+  s1.getCell("B10").value = "시트 안내"; s1.getCell("B10").font = font({ bold: true, size: 12 });
+  [["담당자별", "누구에게 얼마 (금액 비중 포함)"], ["날짜별", "날짜마다 담당자별로 얼마"], ["주별", "월~일 한 주마다 담당자별로 얼마"], ["월별", "한 달마다 담당자별로 얼마"], ["요일별", "어느 요일이 바쁜지"], ["금액 미입력", "방문했는데 금액이 비어 있는 예약"], ["내역", "예약 하나하나의 원본 기록 (필터 가능)"]].forEach(function (g, i) {
+    s1.getCell(11 + i, 2).value = g[0]; s1.getCell(11 + i, 2).font = font({ bold: true }); s1.getCell(11 + i, 3).value = g[1]; s1.getCell(11 + i, 3).font = font({ color: "FF4A423A" });
+  });
+  // ---- 담당자별
+  var s2 = sheet("담당자별", [14, 9, 9, 12, 12, 12, 16, 17, 11], "FFB08D45");
+  title(s2, "담당자별 실적", "누구에게 얼마인지 한눈에 보는 표예요. 방문에는 '나감'도 포함돼요.");
+  header(s2, 5, ["담당"].concat(NH, ["금액 비중"]));
+  totalRow(s2, 6, ["전체"], all, 3);
+  var pc = s2.getCell(6, 10); pc.value = all.amt ? 1 : 0; pc.numFmt = PCT; pc.font = font({ bold: true }); pc.fill = fill(SAND); pc.alignment = { horizontal: "right" }; pc.border = { bottom: med };
+  staffOrder.forEach(function (st, k) {
+    var r = 7 + k, a = agg(rows.filter(function (x) { return x.staff === st; }));
+    var c = s2.getCell(r, 2); c.value = st; c.font = font(); c.alignment = { horizontal: "left", indent: 1 }; c.border = { bottom: thin };
+    nums(s2, r, 3, a);
+    var p = s2.getCell(r, 10); p.value = all.amt ? a.amt / all.amt : 0; p.numFmt = PCT; p.font = font(); p.alignment = { horizontal: "right" }; p.border = { bottom: thin };
+    if (k % 2) for (var cc = 2; cc <= 10; cc++) s2.getCell(r, cc).fill = fill(PAPER);
+  });
+  if (staffOrder.length) { bars(s2, "H7:H" + (6 + staffOrder.length)); rateRed(s2, "F7:F" + (6 + staffOrder.length)); }
+  s2.views = [{ showGridLines: false, zoomScale: 110, state: "frozen", xSplit: 2, ySplit: 6 }];
+  // ---- 날짜/주/월
+  function periodSheet(name, ttl, note, keyname, keyfn, labelfn) {
+    var ws = sheet(name, [20, 10, 9, 9, 12, 12, 13, 16, 17], "FFB08D45"); title(ws, ttl, note);
+    header(ws, 5, [keyname, "담당"].concat(NH)); totalRow(ws, 6, ["전체", "전체"], all, 4);
+    var groups = {}, keys = []; rows.forEach(function (r) { var k = keyfn(r); if (!groups[k]) { groups[k] = []; keys.push(k); } groups[k].push(r); });
+    keys.sort().reverse();
+    var r = 7, b = false, first = 7;
+    keys.forEach(function (k) {
+      b = !b; var sts = staffOrder.filter(function (s) { return groups[k].some(function (x) { return x.staff === s; }); });
+      sts.forEach(function (s, j) {
+        var a = agg(groups[k].filter(function (x) { return x.staff === s; }));
+        var c1 = ws.getCell(r, 2), c2 = ws.getCell(r, 3);
+        c1.value = labelfn(k); c1.font = font({ bold: j === 0, color: j === 0 ? INK : "FFB9AFA3" }); c1.alignment = { horizontal: "left", indent: 1 };
+        c2.value = s; c2.font = font(); c2.alignment = { horizontal: "left", indent: 1 };
+        nums(ws, r, 4, a);
+        for (var cc = 2; cc <= 10; cc++) { var x = ws.getCell(r, cc); if (b) x.fill = fill(PAPER); if (j === 0) x.border = { top: band, bottom: thin }; else x.border = { bottom: thin }; }
+        r++;
+      });
+    });
+    if (r > first) { ws.autoFilter = "B5:J" + (r - 1); bars(ws, "I" + first + ":I" + (r - 1)); rateRed(ws, "G" + first + ":G" + (r - 1)); }
+    ws.views = [{ showGridLines: false, zoomScale: 110, state: "frozen", xSplit: 3, ySplit: 6 }];
+  }
+  var KO = ["일", "월", "화", "수", "목", "금", "토"];
+  periodSheet("날짜별", "날짜별 · 담당자별 실적", "맨 위 '전체' 아래로, 날짜마다 담당자별 줄이 있어요.", "날짜", function (r) { return r.date; }, function (k) { return k + " (" + KO[parse(k).getDay()] + ")"; });
+  periodSheet("주별", "주별 · 담당자별 실적 (월요일 시작)", "맨 위 '전체' 아래로, 한 주마다 담당자별 줄이 있어요.", "주 시작일", function (r) { return weekStart(r.date); }, function (k) { return k; });
+  periodSheet("월별", "월별 · 담당자별 실적", "맨 위 '전체' 아래로, 한 달마다 담당자별 줄이 있어요.", "월", function (r) { return r.date.slice(0, 7); }, function (k) { return k; });
+  // ---- 요일별
+  var s5 = sheet("요일별", [10, 10, 9, 9, 12, 12, 13, 16, 17], "FFB08D45"); title(s5, "요일별 실적", "어느 요일이 바쁘고 매출이 큰지 보는 표예요.");
+  header(s5, 5, ["요일"].concat(NH));
+  DOW.forEach(function (d, k) {
+    var r = 6 + k, c = s5.getCell(r, 2); c.value = d; c.font = font({ bold: true }); c.alignment = { horizontal: "left", indent: 1 }; c.border = { bottom: thin };
+    nums(s5, r, 3, agg(rows.filter(function (x) { return dowOf(x.date) === k; })));
+    if (k % 2) for (var cc = 2; cc <= 9; cc++) s5.getCell(r, cc).fill = fill(PAPER);
+  });
+  bars(s5, "H6:H12");
+  // ---- 금액 미입력
+  var s6 = sheet("금액 미입력", [14, 14, 12, 8, 10, 10], "FFB3394A"); title(s6, "금액 미입력 (방문했는데 금액이 빠진 예약)", "예약 목록이나 좌석에서 금액을 넣으면 실적에 반영돼요.");
+  if (!missing.length) { s6.getCell("B5").value = "금액이 빠진 방문 예약이 없어요."; s6.getCell("B5").font = font({ bold: true, color: MUTE }); }
+  else {
+    header(s6, 5, ["날짜", "예약명", "담당", "인원", "좌석", "상태"]);
+    missing.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (m, k) {
+      var r = 6 + k; [m.date, m.name, m.staff, m.party, m.seat, m.stl].forEach(function (v, i) { var c = s6.getCell(r, 2 + i); c.value = v; c.font = font(); c.alignment = { horizontal: i === 3 ? "right" : "left", indent: i === 3 ? 0 : 1 }; c.border = { bottom: thin }; if (k % 2) c.fill = fill(PAPER); });
+    });
+    s6.views = [{ showGridLines: false, zoomScale: 110, state: "frozen", ySplit: 5 }]; s6.autoFilter = "B5:G" + (5 + missing.length);
+  }
+  // ---- 내역
+  var s7 = sheet("내역", [13, 14, 12, 8, 10, 10, 14], "FF8A8176");
+  header(s7, 2, ["날짜", "예약명", "담당", "인원", "좌석", "상태", "금액(원)"]);
+  rows.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; }).forEach(function (m, k) {
+    var r = 3 + k; [m.date, m.name, m.staff, m.party, m.seat, m.stl, m.amt].forEach(function (v, i) { var c = s7.getCell(r, 2 + i); c.value = v; c.font = font(); c.border = { bottom: thin }; c.alignment = { horizontal: i === 6 || i === 3 ? "right" : "left", indent: i === 6 || i === 3 ? 0 : 1 }; if (i === 6) c.numFmt = MON; if (k % 2) c.fill = fill(PAPER); });
+  });
+  if (rows.length) s7.autoFilter = "B2:H" + (2 + rows.length);
+  s7.views = [{ showGridLines: false, zoomScale: 110, state: "frozen", ySplit: 2 }];
+  return wb;
+}
+
+var EXCELJS_URL = "https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js";
+function loadExcelJS() {
+  return new Promise(function (resolve, reject) {
+    if (window.ExcelJS) return resolve(window.ExcelJS);
+    var sc = document.createElement("script"); sc.src = EXCELJS_URL; sc.async = true;
+    sc.onload = function () { window.ExcelJS ? resolve(window.ExcelJS) : reject(new Error("no ExcelJS")); };
+    sc.onerror = function () { reject(new Error("load failed")); };
+    document.head.appendChild(sc);
+  });
+}
+$("xlsBtn").addEventListener("click", function () {
+  var btn = $("xlsBtn"), old = btn.textContent; btn.disabled = true; btn.textContent = "엑셀 만드는 중…";
+  loadExcelJS().then(function (X) { return buildPerfWorkbook(X, rows).xlsx.writeBuffer(); }).then(function (buf) {
+    var blob = new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "ARZU_실적_" + todayStr() + ".xlsx";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    toast("엑셀 파일을 만들었어요.");
+  }).catch(function () { toast("엑셀을 만들지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요."); })
+    .then(function () { btn.disabled = false; btn.textContent = old; });
 });
 
 /* ---------- no accidental page zoom ---------- */
