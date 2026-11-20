@@ -280,6 +280,9 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
 /* tabs: no fill colors; selected = bold with a dark outline */
 .tabs4 button, .tabs4 button.act, .tabs4 button[aria-selected="true"], .tabs4 button.act[aria-selected="true"] { background:#fff; color:var(--ink); border:1px solid #e6e0d6; font-weight:500; box-shadow:none; }
 .tabs4 button[aria-selected="true"] { border:1.5px solid var(--ink); font-weight:700; }
+.datebar { justify-content:center; }
+.sum { justify-content:space-between; flex-wrap:nowrap; }
+.sum span { flex:none; }
 </style>
 </head>
 <body>
@@ -314,7 +317,7 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
         <button class="icon" id="mPrev" type="button" aria-label="전날">‹</button>
         <label class="datepick"><span id="mLabel"></span><input type="date" id="mDate" aria-label="날짜"></label>
         <button class="icon" id="mNext" type="button" aria-label="다음날">›</button>
-        <button class="pill" id="mToday" type="button">오늘</button>
+        <button class="pill" id="mToday" type="button" hidden>오늘</button>
       </div>
       <div class="sum" id="sum"></div>
       <div class="mapbox">
@@ -720,7 +723,7 @@ function buildMap() {
   });
   buildLive(date, m); updLabel(date);
 }
-function updLabel(date) { var p = date.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); $("mLabel").textContent = (+p[1]) + "/" + (+p[2]) + " (" + DAYS[d.getDay()] + ")" + (date === todayStr() ? " · 오늘" : ""); }
+function updLabel(date) { var p = date.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); $("mLabel").textContent = (+p[1]) + "/" + (+p[2]) + " (" + DAYS[d.getDay()] + ")"; }
 function shiftDay(n) { var v = $("mDate").value || todayStr(), p = v.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2] + n); $("mDate").value = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); buildMap(); }
 $("mPrev").addEventListener("click", function () { shiftDay(-1); });
 $("mNext").addEventListener("click", function () { shiftDay(1); });
