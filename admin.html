@@ -84,22 +84,6 @@ main { max-width:960px; margin:0 auto; padding:14px 14px calc(40px + env(safe-ar
 .seat.lit { background:rgba(255,196,60,.55); box-shadow:0 0 14px 5px rgba(255,190,50,.85); outline:2px solid #ffd45c; }
 .seat.pre { background:rgba(120,190,255,.35); box-shadow:0 0 10px 3px rgba(120,190,255,.7); outline:2px dashed #9bd0ff; }
 .seat .tg { position:absolute; left:50%; top:100%; transform:translateX(-50%); margin-top:1px; font-size:max(8px,.78cqw); line-height:1.12; text-align:center; white-space:nowrap; max-width:6.5em; overflow:hidden; text-overflow:ellipsis; background:#17120f; color:#ffe9a8; padding:.1cqw .35cqw; border-radius:3px; font-weight:700; pointer-events:none; z-index:2; }
-.seat .tg small { display:block; font-size:.88em; font-weight:600; opacity:.85; }
-.seat.lit.ot { background:rgba(214,92,170,.55); box-shadow:0 0 14px 5px rgba(214,92,170,.85); outline:2px solid #ff9fd6; }
-.seat.pre.ot { background:rgba(170,120,230,.38); box-shadow:0 0 10px 3px rgba(170,120,230,.75); outline:2px dashed #cfb0ff; }
-.seat.ot .tg { background:#3a1236; color:#ffd3ef; }
-.live button.ot.v { border-left-color:#d65caa; } .live button.ot.p { border-left-color:#a678e6; }
-.tbadge { display:inline-block; font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:999px; background:#f3dcf0; color:#7a1f6e; margin-left:6px; vertical-align:middle; }
-.teamseg { display:flex; gap:8px; } .teamseg button { flex:1; min-height:46px; border:1px solid var(--line); background:#fff; border-radius:12px; font-weight:700; }
-.teamseg button[aria-pressed="true"].our { background:var(--ink); color:#fff; border-color:var(--ink); }
-.teamseg button[aria-pressed="true"].other { background:#7a1f6e; color:#fff; border-color:#7a1f6e; }
-#pDlg .dlg { padding:0 16px 40px; }
-#pDlg .dh2 { position:sticky; top:0; z-index:5; background:var(--bg); margin:0 -16px; padding:calc(10px + env(safe-area-inset-top)) 16px 10px; border-bottom:1px solid var(--line); }
-#pDlg textarea { min-height:150px; }
-.pv { display:grid; gap:6px; } .pv .row { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; }
-.pv .row.bad { border-color:#e8c9cb; background:#fdf3f3; } .pv .row.dup { opacity:.6; }
-.pv .row b { font-size:15px; } .pv .row small { color:var(--muted); display:block; }
-.pv .row input[type=checkbox] { width:22px; height:22px; min-height:0; flex:none; }
 .live { display:grid; gap:8px; margin-top:14px; }
 .live h3 { margin:4px 2px 0; font-size:14px; color:var(--muted); font-weight:700; }
 .live button { text-align:left; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:13px 14px; border:1px solid var(--line); border-radius:14px; background:#fff; min-height:56px; }
@@ -341,7 +325,6 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
         <label class="datepick"><span id="mLabel"></span><input type="date" id="mDate" aria-label="날짜"></label>
         <button class="icon" id="mNext" type="button" aria-label="다음날">›</button>
         <button class="pill" id="mToday" type="button" hidden>오늘</button>
-        <button class="pill" id="pasteBtn" type="button">📋 붙여넣기 등록</button>
       </div>
       <div class="sum" id="sum"></div>
       <div class="mapbox">
@@ -390,20 +373,13 @@ body { background:radial-gradient(120% 40% at 50% -6%, #fbf9f5 0%, var(--bg) 70%
     </div>
     <datalist id="staffs"></datalist>
     <div><label for="eStaff">담당</label><input type="text" id="eStaff" maxlength="40" placeholder="내 이름을 누르거나 새로 입력" autocomplete="off"><div id="eStaffPick"></div></div>
-    </div>
-    <div class="g2">
-      <div><label for="eTime">입장 시간 <small style="font-weight:500;color:var(--muted)">(예: 21:30)</small></label><input type="text" id="eTime" maxlength="10" placeholder="예: 21:30" autocomplete="off"></div>
-      <div><label>소속</label><div class="teamseg" id="eTeam"><button type="button" class="our" data-v="our">우리팀</button><button type="button" class="other" data-v="other">타팀</button></div></div>
     <div id="eStatusBox"><label for="eStatus">상태</label><select id="eStatus"></select></div>
     <div><label for="eReq">특이사항</label><textarea id="eReq" maxlength="500"></textarea></div>
-    <div><label for="eGuests">게스트 목록 <small style="font-weight:500;color:var(--muted)">(한 줄에 한 명, 입장 시간도 함께 적어도 돼요)</small></label><textarea id="eGuests" maxlength="3000" placeholder="예:&#10;홍길동 21:30&#10;김민수 22:00"></textarea></div>
     <div id="eOrdersBox"><label for="eOrders">주문 내용</label><textarea id="eOrders" maxlength="1000" placeholder="나중에 주문받은 뒤 적어도 돼요"></textarea></div>
     </div>
     <div class="dlg-acts" id="eActs"><button type="button" class="btn danger" id="eDel">이 예약 삭제</button></div>
   </form>
 </dialog>
-
-<dialog id="pDlg"><div class="dlg" id="pBody"></div></dialog>
 
 <dialog id="sDlg">
   <div class="dlg" id="sBody"></div>
@@ -475,7 +451,7 @@ $("loginForm").addEventListener("submit", function (ev) {
 function enter() {
   $("loginView").hidden = true; $("appView").hidden = false; setTab("seat");
   load(); clearInterval(timer);
-  timer = setInterval(function () { if (!$("dlg").open && !$("sDlg").open && !$("pDlg").open) load(true); }, 15000);
+  timer = setInterval(function () { if (!$("dlg").open && !$("sDlg").open) load(true); }, 15000);
 }
 function logout(expired) {
   var t = token; token = null; clearInterval(timer);
@@ -591,10 +567,8 @@ function renderList() {
     var dead = x.status === "cancelled" || x.status === "noshow" || x.status === "rejected";
     var c = el("div", "rc" + (x.status === "requested" ? " new" : "") + (dead ? " dead" : "")); c.tabIndex = 0; c.setAttribute("role", "button");
     var seats = seatList(x); c.appendChild(el("div", "rt" + (seats.length ? "" : " none"), seats.length ? seats.join(", ") : "자리 미정"));
-    var mid = el("div"), nm = el("div", "rn", x.name); nm.appendChild(el("span", "rp", x.party_size + "명")); if (x.team === "other") nm.appendChild(el("span", "tbadge", "타팀")); mid.appendChild(nm);
+    var mid = el("div"), nm = el("div", "rn", x.name); nm.appendChild(el("span", "rp", x.party_size + "명")); mid.appendChild(nm);
     var rs = el("div", "rs");
-    if (x.visit_time) rs.appendChild(el("span", null, x.visit_time + " 입장"));
-    if (x.guests) rs.appendChild(el("span", null, "게스트 " + x.guests.split(/\n/).filter(Boolean).length + "명"));
     if (x.staff) rs.appendChild(el("span", null, "담당 " + x.staff));
     rs.appendChild(el("b", "amt", x.sales_amount ? won(x.sales_amount) + "원" : "금액 미입력"));
     if (x.contact && x.contact_type !== "none") rs.appendChild(el("span", null, labelOf(CTYPE, x.contact_type) + " " + x.contact));
@@ -616,7 +590,7 @@ function renderList() {
 function payloadOf(x, over) {
   var o = { id: x.id, name: x.name, status: x.status, contact_type: x.contact_type, contact: x.contact || "", party_size: String(x.party_size),
     visit_date: x.visit_date, visit_time: x.visit_time || "", seat: x.seat || "", channel: x.channel || "", request: x.request || "",
-    sales_amount: x.sales_amount == null ? "" : String(x.sales_amount), revisit_count: String(x.revisit_count || 0), memo: x.memo || "", staff: x.staff || "", orders: x.orders || "", team: x.team || "our", guests: x.guests || "" };
+    sales_amount: x.sales_amount == null ? "" : String(x.sales_amount), revisit_count: String(x.revisit_count || 0), memo: x.memo || "", staff: x.staff || "", orders: x.orders || "" };
   for (var k in over) o[k] = over[k];
   return o;
 }
@@ -707,12 +681,8 @@ function moneyInput(inp) { inp.type = "text"; inp.inputMode = "numeric"; inp.aut
 moneyInput($("eSales"));
 /* ---------- edit dialog ---------- */
 var editScroll = 0;
-function editingSync() { if ($("dlg").open || $("sDlg").open || $("pDlg").open) return; document.body.classList.remove("editing"); window.scrollTo(0, editScroll); }
-$("dlg").addEventListener("close", editingSync); $("sDlg").addEventListener("close", editingSync); $("pDlg").addEventListener("close", editingSync);
-var teamVal = "our";
-function lastTeam() { try { return localStorage.getItem("arzu_team") || ""; } catch (e) { return ""; } }
-function setTeam(v) { teamVal = v === "other" ? "other" : "our"; var b = $("eTeam").querySelectorAll("button"); for (var i = 0; i < b.length; i++) b[i].setAttribute("aria-pressed", b[i].getAttribute("data-v") === teamVal ? "true" : "false"); }
-$("eTeam").addEventListener("click", function (ev) { var t = ev.target.closest("button"); if (t) { setTeam(t.getAttribute("data-v")); try { localStorage.setItem("arzu_team", teamVal); } catch (e) {} } });
+function editingSync() { if ($("dlg").open || $("sDlg").open) return; document.body.classList.remove("editing"); window.scrollTo(0, editScroll); }
+$("dlg").addEventListener("close", editingSync); $("sDlg").addEventListener("close", editingSync);
 function openEdit(x) {
   editing = x || null; $("eErr").textContent = "";
   $("dTitle").textContent = x ? "예약 수정" : "새 예약";
@@ -722,7 +692,6 @@ function openEdit(x) {
   $("eReq").value = x ? (x.request || "") : "";
   $("eSales").value = x && x.sales_amount != null ? commaFmt(x.sales_amount) : "";
   $("eStaff").value = x ? (x.staff || "") : lastStaff(); $("eStaffPick").innerHTML = ""; $("eStaffPick").appendChild(staffPick($("eStaff"))); $("eOrders").value = x ? (x.orders || "") : "";
-  $("eTime").value = x ? (x.visit_time || "") : ""; $("eGuests").value = x ? (x.guests || "") : ""; setTeam(x ? (x.team || "our") : (lastTeam() || "our"));
   statusOpts($("eStatus"), x ? x.status : "confirmed"); $("eStatusBox").hidden = !x; $("eOrdersBox").hidden = !x;
   
   $("eDel").hidden = !x; $("eActs").hidden = !x; if (!document.body.classList.contains("editing")) editScroll = window.scrollY; document.body.classList.add("editing"); $("dlg").show(); window.scrollTo(0, 0); try { document.activeElement.blur(); } catch (e) {}
@@ -736,7 +705,7 @@ $("editForm").addEventListener("submit", function (ev) {
   if (!name) { bad("예약명을 적어 주세요.", "eName"); return; }
   if (!date) { bad("날짜를 골라 주세요.", "eDate"); return; }
   if (!(party >= 1 && party <= 100)) { bad("인원은 1~100명으로 적어 주세요.", "eParty"); return; }
-  var over = { name: name, party_size: String(party), visit_date: date, seat: $("eSeat").value.trim(), request: $("eReq").value.trim(), sales_amount: rawNum($("eSales").value), staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim(), visit_time: $("eTime").value.trim(), guests: $("eGuests").value.trim(), team: teamVal };
+  var over = { name: name, party_size: String(party), visit_date: date, seat: $("eSeat").value.trim(), request: $("eReq").value.trim(), sales_amount: rawNum($("eSales").value), staff: $("eStaff").value.trim(), orders: $("eOrders").value.trim() };
   var p;
   if (editing) { over.status = $("eStatus").value; p = payloadOf(editing, over); }
   else { p = { status: "confirmed", contact_type: "none", contact: "", visit_time: "", channel: "", revisit_count: "0", memo: "" }; for (var k in over) p[k] = over[k]; }
@@ -771,10 +740,8 @@ function buildMap() {
     var occ = m[s[0]];
     if (occ) {
       var seated = occ.some(function (x) { return x.status === "visited"; });
-      b.className += (seated ? " lit" : " pre") + (occ[0].team === "other" ? " ot" : "");
-      var nm0 = occ[0].name.length > 4 ? occ[0].name.slice(0, 4) + "…" : occ[0].name, tg = el("span", "tg", nm0 + " " + occ[0].party_size + (occ.length > 1 ? " 외" : ""));
-      if (occ[0].visit_time) tg.appendChild(el("small", null, occ[0].visit_time));
-      b.appendChild(tg);
+      b.className += seated ? " lit" : " pre";
+      b.appendChild(el("span", "tg", (occ[0].name.length > 4 ? occ[0].name.slice(0, 4) + "…" : occ[0].name) + " " + occ[0].party_size + (occ.length > 1 ? " 외" : "")));
     }
     b.addEventListener("click", function () { openSeat(s[0]); });
     map.appendChild(b);
@@ -1034,7 +1001,7 @@ function buildLive(date, m) {
   rows.forEach(function (x) { if (x.visit_date !== date || !LIVE[x.status] || seen[x.id]) return; seen[x.id] = 1; if (seatList(x).length) { if (x.status === "visited") vis.push(x); else pre.push(x); } });
   var guests = vis.reduce(function (n, x) { return n + x.party_size; }, 0), pg = pre.reduce(function (n, x) { return n + x.party_size; }, 0);
   var sum = $("sum"); sum.innerHTML = "";
-  [["var(--amber)", "앉음 " + vis.length + "팀 " + guests + "명"], ["var(--blue)", "미리 배정 " + pre.length + "팀" + (pg ? " " + pg + "명" : "")], ["#d65caa", "분홍·보라 = 타팀"]].forEach(function (a) {
+  [["var(--amber)", "앉음 " + vis.length + "팀 " + guests + "명"], ["var(--blue)", "미리 배정 " + pre.length + "팀" + (pg ? " " + pg + "명" : "")]].forEach(function (a) {
     var sp = el("span"), dot = el("i"); dot.style.background = a[0]; sp.appendChild(dot); sp.appendChild(document.createTextNode(a[1])); sum.appendChild(sp);
   });
   if (!vis.length && !pre.length) { box.appendChild(el("p", "note", "아직 자리에 배정된 손님이 없어요. 지도에서 자리를 눌러 앉혀 보세요.")); return; }
@@ -1045,91 +1012,13 @@ function buildLive(date, m) {
     var list = by[k], v = list.filter(function (x) { return x.status === "visited"; }), g = v.reduce(function (n, x) { return n + x.party_size; }, 0);
     box.appendChild(el("h3", null, k + " · 앉음 " + v.length + "팀 " + g + "명" + (list.length - v.length ? " · 예약 " + (list.length - v.length) + "팀" : "")));
     list.forEach(function (x) {
-      var b = el("button", (x.status === "visited" ? "v" : "p") + (x.team === "other" ? " ot" : "")); b.type = "button";
-      var l = el("span"); l.appendChild(el("b", null, x.name + " · " + x.party_size + "명" + (x.team === "other" ? " (타팀)" : ""))); l.appendChild(el("small", null, (x.visit_time || "시간 미정") + (x.orders ? " · " + x.orders.slice(0, 24) : "")));
+      var b = el("button", x.status === "visited" ? "v" : "p"); b.type = "button";
+      var l = el("span"); l.appendChild(el("b", null, x.name + " · " + x.party_size + "명")); l.appendChild(el("small", null, (x.visit_time || "시간 미정") + (x.orders ? " · " + x.orders.slice(0, 24) : "")));
       b.appendChild(l); b.appendChild(el("b", "sc", seatList(x).join(", ")));
       b.addEventListener("click", function () { openSeat(seatList(x)[0]); }); box.appendChild(b);
     });
   });
 }
-
-/* ---------- paste registration (KakaoTalk text -> reservations) ---------- */
-function seatIds() { var o = {}; SEATS.forEach(function (a) { o[a[0]] = 1; }); return o; }
-function parseOneLine(ln) {
-  var s = ln.replace(/^\s*\d{4}[.\-\/년]\s*\d{1,2}[.\-\/월]\s*\d{1,2}[.일]?\s*(오전|오후)?\s*\d{1,2}:\d{2}\s*,\s*[^:]*:\s*/, "")
-            .replace(/^\s*\[[^\]]*\]\s*(\[[^\]]*\]\s*)?/, "").replace(/^\s*[-•·*]\s*/, "").replace(/^\s*\d{1,2}\s*[.)]\s+/, "");
-  if (!s.trim()) return null;
-  var out = { raw: ln.trim(), seat: "", time: "", party: 0, name: "" }, ids = seatIds(), found = [];
-  s = s.replace(/(^|[^A-Za-z0-9])([A-Za-z]{1,2}\d{1,2})(?![A-Za-z0-9])/g, function (m, pre, id) { if (ids[id.toUpperCase()]) { found.push(id.toUpperCase()); return pre + " "; } return m; });
-  out.seat = found.join(" ");
-  var tm = s.match(/(오전|오후|밤|저녁|새벽)?\s*(\d{1,2})\s*(?::|시)\s*(\d{2})?\s*(분)?/);
-  if (tm) {
-    var hh = +tm[2], mm = tm[3] ? +tm[3] : 0;
-    if ((tm[1] === "오후" || tm[1] === "저녁" || tm[1] === "밤") && hh < 12) hh += 12;
-    if ((tm[1] === "새벽" || tm[1] === "밤") && hh === 12) hh = 0;
-    if (hh < 24 && mm < 60) { out.time = pad(hh) + ":" + pad(mm); s = s.replace(tm[0], " "); }
-  }
-  var pm = s.match(/(\d{1,3})\s*(명|인|분|pax)/i); if (pm) { out.party = +pm[1]; s = s.replace(pm[0], " "); }
-  s = s.replace(/(테이블|좌석|자리|예약|입장|도착)/g, " ").replace(/[,\/·ㆍ|:：()\[\]\-]+/g, " ").replace(/님/g, "").replace(/\s+/g, " ").trim();
-  if (!out.party) { var nm = s.match(/(?:^|\s)(\d{1,2})(?:\s|$)/); if (nm) { out.party = +nm[1]; s = s.replace(nm[0], " ").trim(); } }
-  out.name = s.slice(0, 60);
-  return out;
-}
-function parsePaste(txt) {
-  var items = [];
-  if (/\d\s*[.)]\s*[^:：\n]{1,12}[:：]/.test(txt)) {
-    txt.split(/\n\s*\n/).forEach(function (blk) { if (!blk.trim()) return; var f = parseForm(blk); if (f.name) items.push({ raw: blk.trim().split("\n")[0], name: f.name, party: f.party || 0, seat: f.seat || "", time: f.time || "", date: f.date || "", staff: f.staff || "", request: f.request || "" }); });
-    if (items.length) return items;
-  }
-  txt.split(/\r?\n/).forEach(function (ln) { var o = parseOneLine(ln); if (o) items.push(o); });
-  return items;
-}
-function openPaste() {
-  var body = $("pBody"); body.innerHTML = "";
-  var h = el("div", "dh2"), t = el("h2", null, "붙여넣기로 등록"), x = el("button", "icon", "✕"); x.type = "button"; x.setAttribute("aria-label", "닫기"); x.addEventListener("click", function () { $("pDlg").close(); });
-  h.appendChild(t); h.appendChild(x); body.appendChild(h);
-  body.appendChild(el("p", "note", "카톡 내용을 복사해서 아래에 붙여넣고 '읽어보기'를 눌러요. 한 줄에 한 팀씩 적혀 있으면 돼요. 예) 홍길동 4명 A3 21:30"));
-  var ta = document.createElement("textarea"); ta.placeholder = "여기에 붙여넣기"; ta.setAttribute("aria-label", "붙여넣기"); body.appendChild(ta);
-  var g = el("div", "g2"), d1 = el("div"), d2 = el("div");
-  d1.appendChild(el("label", null, "날짜")); var di = document.createElement("input"); di.type = "date"; di.value = $("mDate").value || todayStr(); d1.appendChild(di);
-  d2.appendChild(el("label", null, "담당")); var si = document.createElement("input"); si.type = "text"; si.maxLength = 40; si.placeholder = "내 이름"; si.value = lastStaff(); d2.appendChild(si);
-  g.appendChild(d1); g.appendChild(d2); body.appendChild(g);
-  var tl = el("div"); tl.appendChild(el("label", null, "소속")); var seg = el("div", "teamseg"), pt = lastTeam() || "our";
-  [["our", "우리팀"], ["other", "타팀"]].forEach(function (a) { var b = el("button", a[0], a[1]); b.type = "button"; b.setAttribute("aria-pressed", a[0] === pt ? "true" : "false");
-    b.addEventListener("click", function () { pt = a[0]; seg.querySelectorAll("button").forEach(function (q) { q.setAttribute("aria-pressed", q.className === pt ? "true" : "false"); }); }); seg.appendChild(b); });
-  tl.appendChild(seg); body.appendChild(tl);
-  var rd = el("button", "btn full", "읽어보기"); rd.type = "button"; body.appendChild(rd);
-  var pv = el("div", "pv"); body.appendChild(pv); var go = el("button", "btn full", "등록하기"); go.type = "button"; go.hidden = true; body.appendChild(go);
-  var items = [];
-  rd.addEventListener("click", function () {
-    items = parsePaste(ta.value); pv.innerHTML = ""; go.hidden = true;
-    if (!items.length) { pv.appendChild(el("p", "note", "읽을 내용이 없어요. 이름·인원·자리가 있는 줄을 붙여넣어 주세요.")); return; }
-    var n = 0;
-    items.forEach(function (it) {
-      var date = it.date || di.value, dup = rows.some(function (r) { return r.visit_date === date && r.name === it.name && r.status !== "cancelled" && r.status !== "rejected"; });
-      it.date = date; it.use = !!it.name && !dup; it.dup = dup;
-      var row = el("div", "row" + (it.name ? "" : " bad") + (dup ? " dup" : "")), cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = it.use; cb.disabled = !it.name;
-      cb.addEventListener("change", function () { it.use = cb.checked; cnt(); }); row.appendChild(cb);
-      var w = el("div"); w.appendChild(el("b", null, it.name || "(이름을 못 읽었어요)"));
-      w.appendChild(el("small", null, (it.party ? it.party + "명" : "인원 확인 필요(1명으로 등록)") + " · " + (it.seat || "자리 없음") + " · " + (it.time || "시간 없음") + (dup ? " · 이미 있어요" : "")));
-      if (!it.name) w.appendChild(el("small", null, "원문: " + it.raw.slice(0, 40)));
-      row.appendChild(w); pv.appendChild(row);
-    });
-    function cnt() { var c = items.filter(function (i) { return i.use; }).length; go.textContent = c + "건 등록하기"; go.disabled = !c; }
-    cnt(); go.hidden = false;
-  });
-  go.addEventListener("click", function () {
-    var list = items.filter(function (i) { return i.use; }); if (!list.length) return; go.disabled = true; var done = 0, fail = 0, staff = si.value.trim(); if (staff) saveStaff(staff);
-    try { localStorage.setItem("arzu_team", pt); } catch (e) {}
-    list.reduce(function (pr, it) {
-      return pr.then(function () {
-        return rpc("admin_save", { p_token: token, p: { status: "confirmed", contact_type: "none", contact: "", channel: "", revisit_count: "0", memo: "", name: it.name, party_size: String(it.party || 1), visit_date: it.date, visit_time: it.time || "", seat: it.seat || "", request: it.request || "", sales_amount: "", staff: it.staff || staff, orders: "", team: pt, guests: "" } }).then(function () { done++; }).catch(function () { fail++; });
-      });
-    }, Promise.resolve()).then(function () { $("pDlg").close(); toast(done + "건 등록했어요." + (fail ? " (" + fail + "건 실패)" : "")); return load(true); });
-  });
-  if (!document.body.classList.contains("editing")) editScroll = window.scrollY; document.body.classList.add("editing"); $("pDlg").show(); window.scrollTo(0, 0);
-}
-$("pasteBtn").addEventListener("click", openPaste);
 $("mDate").value = todayStr();
 $("mDate").addEventListener("change", buildMap);
 $("mToday").addEventListener("click", function () { $("mDate").value = todayStr(); buildMap(); });
