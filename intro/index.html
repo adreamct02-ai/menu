@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ARZU Cheongdam · 소개</title>
+<meta name="description" content="브런치부터 새벽 4시까지, 청담의 모든 시간. 청담 아르쥬를 소개합니다. 브런치, 다이닝, 라운지, 룸, 테라스, 이벤트.">
+<meta property="og:title" content="ARZU Cheongdam · 소개">
+<meta property="og:description" content="브런치부터 새벽 4시까지, 청담의 모든 시간.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://adreamct02-ai.github.io/menu/intro/m/lounge.jpg">
+<meta name="theme-color" content="#170E10">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{--ink:#170E10;--ink2:#211416;--wine:#8A1118;--ivory:#F5EFE6;--sand:#E6DCCB;--mute:#B9ABA3;--line:rgba(230,220,203,.18)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--ivory);font-family:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo',sans-serif;font-weight:400;line-height:1.7;font-size:16px;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+img,video{display:block;max-width:100%}
+.serif{font-family:'Pretendard Variable',Pretendard,sans-serif}
+.disp{font-weight:600}
+a{color:inherit}
+header{position:fixed;inset:0 0 auto 0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:max(18px,env(safe-area-inset-top)) 28px 18px;mix-blend-mode:difference}
+header b{font-size:18px;letter-spacing:.3em;font-weight:700}
+header a{font-size:13px;letter-spacing:.12em;text-decoration:none}
+.hero{position:relative;min-height:100svh;display:flex;align-items:flex-end;padding:0 28px 9vh;overflow:hidden}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(1.1);transform:scale(1.04);animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{to{transform:scale(1.12) translate(-1.5%,-1%)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,14,16,.25),rgba(23,14,16,.1) 40%,var(--ink) 100%)}
+.hero div{position:relative;z-index:2;max-width:1200px;width:100%;margin:0 auto}
+.hero h1{font-weight:800;font-size:clamp(60px,15vw,190px);line-height:.92;letter-spacing:-.04em}
+.hero h1 i{display:block;font-size:.42em;letter-spacing:.34em;margin-top:.55em;font-style:normal;font-weight:500;color:var(--sand)}
+.hero p{margin-top:28px;font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(18px,2.2vw,26px);font-weight:400;color:var(--sand)}
+.hero small{display:block;margin-top:10px;color:var(--mute);font-size:14px;letter-spacing:.08em}
+section{padding:clamp(64px,11vw,130px) 22px}
+.wrap{max-width:1200px;margin:0 auto}
+h2{font-family:'Pretendard Variable',Pretendard,sans-serif;font-weight:700;font-size:clamp(26px,6.2vw,46px);line-height:1.28;margin-bottom:22px;letter-spacing:-.03em}
+h2 em{font-style:normal;font-weight:700;color:var(--sand)}
+.lead{font-size:clamp(15.5px,4vw,19px);color:var(--sand);max-width:34em}
+.light{background:var(--ivory);color:var(--ink)}
+.light .lead{color:#4b3a37}.light h2 em{color:var(--wine)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,6vw,90px);align-items:center}
+.grid2.top{align-items:start}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+.frame{overflow:hidden;background:#000}
+.frame img,.frame video{width:100%;height:auto}
+.vid{max-height:72svh;width:auto;margin:0 auto;border-radius:2px}
+.vframe{display:flex;justify-content:center;background:var(--ink2);padding:0}
+.day{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border-top:1px solid rgba(23,14,16,.25)}
+.day div{padding:28px 22px 10px 0}
+.day b{display:block;font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(28px,7vw,44px);font-weight:700;color:var(--wine);line-height:1.1;letter-spacing:-.03em}
+.day strong{display:block;font-family:'Pretendard Variable',Pretendard,sans-serif;font-weight:600;margin:8px 0 6px}
+.day p{font-size:15px;color:#4b3a37}
+@media(max-width:820px){.day{grid-template-columns:1fr 1fr}}
+.photos{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:36px}
+@media(max-width:700px){.three{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin-right:-22px;padding-right:22px}.three img{flex:0 0 78%;scroll-snap-align:start}}
+.rooms{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px;margin-top:44px;align-items:stretch}
+.rooms img{width:100%;height:100%;object-fit:cover}
+@media(max-width:820px){.rooms{grid-template-columns:1fr 1fr}.rooms img:first-child{grid-column:1/-1}}
+.tt{margin-top:10px}
+.tt div{display:flex;gap:28px;align-items:baseline;padding:22px 0;border-bottom:1px solid rgba(23,14,16,.2)}
+.tt b{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(22px,5vw,34px);font-weight:700;color:var(--wine);min-width:6.2em;letter-spacing:-.02em;line-height:1.1}
+.tt span{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:clamp(17px,2vw,22px)}
+.posters{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.offer{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,56px);margin-top:56px}
+@media(max-width:820px){.offer{grid-template-columns:1fr}}
+.offer div{border-top:1px solid var(--line);padding-top:22px}
+.offer h3{font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:22px;font-weight:600;margin-bottom:10px;color:var(--sand)}
+.offer p{color:var(--mute);font-size:16px}
+.give{margin-top:80px}
+.give li{list-style:none;display:flex;gap:24px;padding:20px 0;border-bottom:1px solid var(--line)}
+.give li b{font-family:'Pretendard Variable',Pretendard,sans-serif;font-weight:600;min-width:5.5em;color:var(--sand)}
+.give li span{color:var(--ivory)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:80px}
+@media(max-width:820px){.steps{grid-template-columns:1fr 1fr}}
+.steps b{font-size:34px;font-weight:700;color:var(--sand);display:block;line-height:1}
+.steps strong{display:block;font-family:'Pretendard Variable',Pretendard,sans-serif;font-weight:600;margin:10px 0 4px}
+.steps p{font-size:15px;color:var(--mute)}
+.cta{display:inline-block;margin-top:70px;padding:20px 40px;border:1px solid var(--sand);font-family:'Pretendard Variable',Pretendard,sans-serif;font-size:18px;text-decoration:none;color:var(--ivory);transition:.3s}
+.cta:hover{background:var(--ivory);color:var(--ink)}
+footer{padding:50px 28px calc(50px + env(safe-area-inset-bottom));color:var(--mute);font-size:14px;text-align:center;border-top:1px solid var(--line)}
+.vframe{position:relative}.pb{position:absolute;inset:0;margin:auto;width:72px;height:72px;border-radius:50%;border:1px solid var(--sand);background:rgba(23,14,16,.55);color:var(--ivory);font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding-left:5px;backdrop-filter:blur(6px)}.pb.off{display:none}
+.r{opacity:0;transform:translateY(24px);transition:opacity .9s ease,transform .9s ease}
+.r.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.hero img{animation:none}.r{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+<header><b>ARZU</b><a href="https://instagram.com/arzu_raon">@arzu_raon</a></header>
+
+<div class="hero">
+  <img src="m/lounge.jpg" alt="">
+  <div>
+    <h1>ARZU<i>CHEONGDAM</i></h1>
+    <p>하루가 끝나지 않는 곳. 브런치부터 새벽 4시까지, 청담의 모든 시간.</p>
+    <small>청담의 라운지, 아르쥬를 소개합니다</small>
+  </div>
+</div>
+
+<section class="light">
+  <div class="wrap grid2">
+    <div class="r">
+      <h2>청담에서 낮과 밤을<br><em>모두 가진</em> 하나의 공간</h2>
+      <p class="lead">Cafe · Dining · Lounge. 오전 11시 브런치와 카페로 시작해 저녁엔 셰프 다이닝, 밤에는 DJ와 라이브 공연이 터지는 라운지로 바뀌어요. 한 번 오면 하루가 통째로 특별해져요.</p>
+      <p class="lead" style="margin-top:18px"><span class="disp" style="font-size:1.15em;font-weight:600">“Where Desires Find Freedom”</span><br>원하는 모든 순간이 자유로워지는 곳이에요.</p>
+    </div>
+    <div class="frame r"><img src="m/lounge_poster.jpg" alt="ARZU Lounge" style="width:100%"></div>
+  </div>
+  <div class="wrap day r">
+    <div><b>11AM</b><strong>브런치 · 카페</strong><p>테라스와 함께하는 낮 시간. 첫 코스로 좋아요.</p></div>
+    <div><b>Evening</b><strong>다이닝</strong><p>스테이크, 파스타, 한식 베이스 요리까지 코스처럼 즐겨요.</p></div>
+    <div><b>Night</b><strong>라운지 · 공연</strong><p>DJ와 이벤트, 파티가 열리는 청담의 밤을 경험해요.</p></div>
+    <div><b>~ 4AM</b><strong>프라이빗 룸</strong><p>일행끼리 늦게까지 머물 수 있어요.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap grid2">
+    <div class="r">
+      <h2><em>Brunch</em> &amp; Cafe</h2>
+      <p class="lead">오전 11시, 청담의 하루를 가장 근사하게 여는 브런치예요. 트러플 프렌치토스트와 아보카도 토스트, 크로크무슈, 시그니처 디저트까지. 나오는 순간 사진을 안 찍을 수가 없어요.</p>
+      <div class="photos" style="margin-top:36px">
+        <img src="m/toast.jpg" alt=""><img src="m/avocado.jpg" alt=""><img src="m/croque.jpg" alt=""><img src="m/cheesecake.jpg" alt="">
+      </div>
+    </div>
+    <div class="vframe r"><video class="vid" src="m/brunch.mp4" poster="m/brunch.jpg" muted loop playsinline preload="metadata" data-auto></video></div>
+  </div>
+</section>
+
+<section class="light">
+  <div class="wrap">
+    <div class="r">
+      <h2><em>Dining</em></h2>
+      <p class="lead">한우 등심과 마라 양갈비 스테이크, 정통 파스타, 아르쥬만의 K소울푸드까지. 라운지에서 이 정도 다이닝이 나온다는 게 놀라운 경험이에요.</p>
+    </div>
+    <div class="three r"><img src="m/steak.jpg" alt=""><img src="m/lamb.jpg" alt=""><img src="m/ravioli.jpg" alt=""></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="r">
+      <h2>해가 지면,<br><em>완전히 다른 얼굴</em></h2>
+      <p class="lead">빛과 사운드가 가득한 DJ 무대, 바, 소파석, 스탠딩까지. 매주 새로운 테마 파티가 열려서 갈 때마다 다른 청담의 밤을 만나요.</p>
+      <p style="margin-top:14px;color:var(--mute);font-size:15px">Ladies Night · Princess Maker · FATEful ARZU · Midnight Backstage</p>
+    </div>
+    <div class="grid2" style="margin-top:56px;gap:10px">
+      <div class="vframe r"><video class="vid" src="m/lounge_a.mp4" poster="m/lounge_a.jpg" muted loop playsinline preload="metadata" data-auto></video></div>
+      <div class="vframe r"><video class="vid" src="m/lounge_b.mp4" poster="m/lounge_b.jpg" muted loop playsinline preload="metadata" data-auto></video></div>
+    </div>
+  </div>
+</section>
+
+<section class="light">
+  <div class="wrap grid2">
+    <div class="vframe r" style="order:2"><video class="vid" src="m/terrace.mp4" poster="m/terrace.jpg" muted loop playsinline preload="metadata" data-auto></video></div>
+    <div class="r">
+      <h2><em>Terrace</em></h2>
+      <p class="lead">실내 라운지와 이어지는 테라스예요. 낮에는 햇살 아래 브런치, 밤에는 반짝이는 조명 속에서 도시를 느끼며 이야기 나누는 자리예요.</p>
+      <p class="lead" style="margin-top:14px">소규모 일행부터 모임까지 편하게 앉을 수 있어요.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="r">
+      <h2>오직 우리 일행만의<br><em>프라이빗 룸</em></h2>
+      <p class="lead">대리석 테이블과 포근한 소파, 은은한 조명, 샴페인 진열장까지. 들어서는 순간 분위기가 달라져요. 기념일, 접대, 모임 어디에도 잘 어울려요.</p>
+    </div>
+    <div class="rooms r"><img src="m/room_a.jpg" alt=""><img src="m/room_b.jpg" alt=""><img src="m/room_c.jpg" alt=""></div>
+    <div class="grid2 top r" style="margin-top:90px">
+      <div><h2 style="font-size:clamp(26px,3.5vw,40px)">공간 구성</h2><p class="lead">바, DJ 부스, 소파석, 테라스 테이블, 룸, 스탠딩 구역까지. 일행 규모와 분위기에 딱 맞는 자리를 골라드려요.</p></div>
+      <img src="m/plan.jpg" alt="공간 도면">
+    </div>
+  </div>
+</section>
+
+<section class="light">
+  <div class="wrap grid2 top">
+    <div class="r">
+      <h2>매주 열리는<br><em>이벤트와 공연</em></h2>
+      <p class="lead">파티를 넘어 아티스트 공연이 함께하는 쇼를 열어요. SETNET PARTY(ARZU × 71ENT × HYSTERIC HOUSE)는 입장부터 MC 오프닝, 4팀의 라이브 무대, 애프터 파티까지 하나의 공연처럼 이어졌어요.</p>
+    </div>
+    <div class="tt r">
+      <div><b>20:00</b><span>파티 입장 시작</span></div>
+      <div><b>21:45</b><span>MC 오프닝</span></div>
+      <div><b>22:00 – 23:00</b><span>메인 쇼, 아티스트 4팀 공연</span></div>
+      <div><b>23:00 ~</b><span>애프터 파티</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap grid2">
+    <div class="r">
+      <h2>공간 전체가<br><em>브랜드의 무대</em></h2>
+      <p class="lead">입구, 메인 LED, DJ 부스, 포토월, VIP존, 테라스, 바까지. 넷플릭스 오징어게임 행사, 위스키 테라스 팝업, AWELL, Hibisco까지 다양한 브랜드가 아르쥬에서 눈에 띄는 경험을 만들었어요.</p>
+    </div>
+    <div class="posters r"><img src="m/awell.jpg" alt=""><img src="m/hibisco.jpg" alt=""></div>
+  </div>
+</section>
+
+<section class="light">
+  <div class="wrap">
+    <div class="r">
+      <h2>이런 날,<br><em>아르쥬로 오세요</em></h2>
+    </div>
+    <div class="offer r" style="--x:0">
+      <div style="border-color:rgba(23,14,16,.25)"><h3 style="color:var(--wine)">청담에서 보내는 하루</h3><p style="color:#4b3a37">낮에는 브런치와 다이닝, 해가 지면 라운지로. 하루 일정 안에서 분위기가 바뀌는 경험을 한곳에서 즐길 수 있어요.</p></div>
+      <div style="border-color:rgba(23,14,16,.25)"><h3 style="color:var(--wine)">우리 일행만의 모임</h3><p style="color:#4b3a37">친구, 동료, 모임 단위로 룸과 테이블에서 편하게 시간을 보낼 수 있어요.</p></div>
+      <div style="border-color:rgba(23,14,16,.25)"><h3 style="color:var(--wine)">공연과 파티가 있는 밤</h3><p style="color:#4b3a37">매주 열리는 이벤트와 공연으로, 갈 때마다 다른 밤을 만나요.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="r">
+      <h2>방문 안내</h2>
+      <p class="lead">룸과 테이블 이용, 이벤트 일정이 궁금하시면 인스타그램으로 편하게 문의해 주세요.</p>
+      <a class="cta" href="https://instagram.com/arzu_raon">인스타그램 DM  @arzu_raon</a>
+      <p style="margin-top:46px;color:var(--mute);font-size:15px">서울 강남구 청담동 91-3, 1층 (선릉로152길 30 1층)<br>화~일 11AM ~ 4AM · 월요일 휴무</p>
+    </div>
+  </div>
+</section>
+
+<footer>© ARZU Cheongdam</footer>
+
+<script>
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in')}}),{threshold:.12});
+document.querySelectorAll('.r').forEach(n=>io.observe(n));
+const vo=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;if(e.isIntersecting){v.muted=true;v.play().catch(()=>{})}else v.pause()}),{threshold:.35});
+document.querySelectorAll('video[data-auto]').forEach(v=>{
+  vo.observe(v);
+  const b=document.createElement('button');b.className='pb';b.setAttribute('aria-label','재생');b.textContent='▶';v.parentNode.appendChild(b);
+  const sync=()=>b.classList.toggle('off',!v.paused);
+  v.addEventListener('play',sync);v.addEventListener('pause',sync);v.addEventListener('playing',sync);
+  const tog=()=>{v.paused?v.play().catch(()=>{}):v.pause()};
+  b.addEventListener('click',e=>{e.stopPropagation();v.muted=true;v.play().catch(()=>{})});
+  v.addEventListener('click',tog);sync();
+});
+</script>
+</body>
+</html>
